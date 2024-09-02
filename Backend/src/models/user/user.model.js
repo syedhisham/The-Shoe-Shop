@@ -29,10 +29,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Male", "Female", "Other"],
     },
-    addresses: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
-    }],
+    addresses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Address",
+      },
+    ],
     contact: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Contact",
@@ -46,37 +48,39 @@ const userSchema = new mongoose.Schema(
       ref: "UserPreferences",
     },
     refreshToken: {
-        type: String,
-      }
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
+
 userSchema.methods.generateAccessToken = function () {
-    return jwt.sign(
-      {
-        _id: this._id,
-        email: this.email,
-        username: this.username,
-        fullName: this.fullName,
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-      }
-    );
-  };
-  userSchema.methods.generateRefreshToken = function () {
-    return jwt.sign(
-      {
-        _id: this._id,
-      },
-      process.env.REFRESH_TOKEN_SECRET,
-      {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-      }
-    );
-  };
-const User = mongoose.model("User", userSchema);
-export default User;
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      firstName: this.firstName,
+      lastName: this.lastName,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    }
+  );
+};
+
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    }
+  );
+};
+
+export const User = mongoose.model("User", userSchema);
