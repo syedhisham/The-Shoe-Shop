@@ -1,0 +1,14 @@
+/* @import '@material-tailwind/react/dist/material-tailwind.css'; Adjust path if necessary */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.hide-scroll-bar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .hide-scroll-bar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
