@@ -16,5 +16,4 @@ const userPreferencesSchema = new mongoose.Schema({
   },
 });
 
-const UserPreferences = mongoose.model("UserPreferences", userPreferencesSchema);
-export default UserPreferences;
+export const UserPreferences = mongoose.model("UserPreferences", userPreferencesSchema);
