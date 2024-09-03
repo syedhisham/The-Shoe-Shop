@@ -1,9 +1,11 @@
 import React from "react";
 import { CarouselCustom } from "../components/CarouselCustom";
+import { Header } from "../components/Header";
 
 const Home = () => {
   return (
     <div>
+      <Header/>
       <CarouselCustom />
       <div>
   <div>
