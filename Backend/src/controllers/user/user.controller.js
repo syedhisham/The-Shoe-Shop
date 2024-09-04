@@ -150,5 +150,14 @@ const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User Logged Out"));
 });
+const getUserFirstName = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user.firstName, "User First Name fetched"));
+});
 
-export { registerUser, loginUser, logoutUser };
+export { registerUser, loginUser, logoutUser, getUserFirstName };
