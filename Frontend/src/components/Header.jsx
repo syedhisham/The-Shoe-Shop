@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import logo from "../assets/webs-log.png"
+import { NavLink } from "react-router-dom";
+import logo from "../assets/webs-log.png";
+
 import {
   Navbar,
   Collapse,
@@ -11,9 +13,12 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
+  Button,
 } from "@material-tailwind/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
+import Logout from "./Logout";
+import axios from "axios";
 
 const gentsFootWearMenuItems = [
   { title: "SHOES" },
@@ -78,9 +83,7 @@ function NavListMenu({ label, menuItems }) {
           </Typography>
         </MenuHandler>
         <MenuList className="hidden max-w-screen-xl rounded-xl lg:block">
-          <ul className="grid gap-y-2 outline-none outline-0">
-            {renderItems}
-          </ul>
+          <ul className="grid gap-y-2 outline-none outline-0">{renderItems}</ul>
         </MenuList>
       </Menu>
       <div className="block lg:hidden">
@@ -94,7 +97,10 @@ function NavList() {
   return (
     <List className="mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
       <NavListMenu label="GENTS FOOTWEAR" menuItems={gentsFootWearMenuItems} />
-      <NavListMenu label="LADIES FOOTWEAR" menuItems={ladiesFootWearMenuItems} />
+      <NavListMenu
+        label="LADIES FOOTWEAR"
+        menuItems={ladiesFootWearMenuItems}
+      />
       <NavListMenu label="NEW ARRIVALS 24" menuItems={newArrivalsMenuItems} />
       <NavListMenu label="SALE" menuItems={saleMenuItems} />
     </List>
@@ -106,7 +112,27 @@ export function Header() {
   const [navbarPosition, setNavbarPosition] = useState("top-8");
   const [navbarHeight, setNavbarHeight] = useState("h-[8rem]");
   const [logoHeight, setLogoHeight] = useState("h-20");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userFirstName, setUserFirstName] = useState(null);
 
+  useEffect(() => {
+    const fetchUserFirstName = async () => {
+      try {
+        const response = await axios.get("/api/users/get-user-first-name", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setUserFirstName(response.data.data);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Failed to fetch user's first name:", error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    fetchUserFirstName();
+  }, []);
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -154,9 +180,33 @@ export function Header() {
             <div className="hidden lg:block">
               <NavList />
             </div>
-            <Typography className="hidden lg:block">Track Your Order</Typography>
+            <Typography className="hidden lg:block">
+              Track Your Order
+            </Typography>
           </div>
           <div className="hidden gap-2 lg:flex items-center">
+            <div className="flex space-x-4">
+              {isAuthenticated ? (
+                <>
+                  {userFirstName && (
+                    <Typography className="flex items-center">
+                      Hello, {userFirstName}
+                    </Typography>
+                  )}
+                  <Logout onLogout={() => setIsAuthenticated(false)} />{" "}
+                  {/* Pass callback to update state */}
+                </>
+              ) : (
+                <>
+                  <NavLink to="/login">
+                    <Button variant="outlined">Log In</Button>
+                  </NavLink>
+                  <NavLink to="/register">
+                    <Button variant="outlined">Sign Up</Button>
+                  </NavLink>
+                </>
+              )}
+            </div>
             <IconButton className="bg-white">
               <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
@@ -178,17 +228,37 @@ export function Header() {
           </IconButton>
         </div>
         <Collapse open={openNav}>
-          <NavList />
-          <Typography className="text-black -mt-5 mb-2 ml-3">
-            Track Your Order
-          </Typography>
-          <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
-            <IconButton className="bg-white">
-              <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
-            </IconButton>
-            <IconButton className="bg-white">
-              <CiShoppingCart style={{ color: "black", fontSize: "2.5em" }} />
-            </IconButton>
+          <div className="bg-white pb-5">
+            <NavList />
+            <Typography className="text-black -mt-5 mb-2 ml-3">
+              Track Your Order
+            </Typography>
+            <div className="flex flex-wrap gap-3 mt-5 mb-5">
+              <NavLink to="/login">
+                <Button
+                  variant="outlined"
+                  className="h-8 flex items-center justify-center text-sm sm:text-base"
+                >
+                  Log In
+                </Button>
+              </NavLink>
+              <NavLink to="/register">
+                <Button
+                  variant="outlined"
+                  className="h-8 flex items-center justify-center text-sm sm:text-base"
+                >
+                  Sign Up
+                </Button>
+              </NavLink>
+            </div>
+            <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
+              <IconButton className="bg-white">
+                <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
+              </IconButton>
+              <IconButton className="bg-white">
+                <CiShoppingCart style={{ color: "black", fontSize: "2.5em" }} />
+              </IconButton>
+            </div>
           </div>
         </Collapse>
       </Navbar>
