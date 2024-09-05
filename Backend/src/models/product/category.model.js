@@ -6,7 +6,6 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
       minlength: 2,
       maxlength: 50,
     },
@@ -14,6 +13,11 @@ const categorySchema = new mongoose.Schema(
       type: String,
       trim: true,
       maxlength: 500,
+    },
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null,
     },
   },
   {
