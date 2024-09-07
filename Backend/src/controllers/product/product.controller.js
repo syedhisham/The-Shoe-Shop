@@ -7,6 +7,7 @@ import {
   uploadOnCloudinary,
   deleteFromCloudinary,
 } from "../../utils/cloudinary.js";
+import mongoose from "mongoose";
 
 const addProduct = asyncHandler(async (req, res) => {
   const {
@@ -340,10 +341,176 @@ const updateCurrentProductImageAndColor = asyncHandler(async (req, res) => {
     );
 });
 
+const getAllProducts = asyncHandler(async (req, res) => {
+  try {
+    const allProducts = await Product.aggregate([
+      {
+        $lookup: {
+          from: "images",
+          localField: "_id",
+          foreignField: "productId",
+          as: "productImages",
+        },
+      },
+      {
+        $unwind: {
+          path: "$productImages",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          description: { $first: "$description" },
+          price: { $first: "$price" },
+          sizes: { $first: "$sizes" },
+          colors: { $first: "$colors" },
+          category: { $first: "$category" },
+          stock: { $first: "$stock" },
+          images: { $push: "$productImages.imageUrl" },
+          totalImagesCount: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          description: 1,
+          price: 1,
+          sizes: 1,
+          colors: 1,
+          category: 1,
+          stock: 1,
+          images: 1,
+          totalImagesCount: 1,
+        },
+      },
+    ]);
+
+    if (!allProducts || allProducts.length === 0) {
+      throw new ApiError(404, "No products found");
+    }
+    const totalNumberOfProducts = await Product.countDocuments();
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          TotalProducts: totalNumberOfProducts,
+          ProductDetails: allProducts,
+        },
+        "All products and their images are fetched successfully"
+      )
+    );
+  } catch (error) {
+    console.error("Error fetching products and images:", error);
+    throw new ApiError(
+      500,
+      "Something went wrong while fetching products and images"
+    );
+  }
+});
+
+const getProductById = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  if (!productId) {
+    throw new ApiError(400, "Enter the product Id to proceed");
+  }
+  const product = await Product.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(productId),
+      },
+    },
+    {
+      $lookup: {
+        from: "images",
+        localField: "_id",
+        foreignField: "productId",
+        as: "productImage",
+      },
+    },
+    {
+      $unwind: {
+        path: "$productImage",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: "_id",
+        totalImagesCount: { $sum: 1 },
+        name: { $first: "$name" },
+        description: { $first: "$description" },
+        price: { $first: "$price" },
+        sizes: { $first: "$sizes" },
+        colors: { $first: "$colors" },
+        images: { $push: "$productImage.imageUrl" },
+        stock: { $first: "$stock" },
+        category: { $first: "$category" },
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "productCategory",
+      },
+    },
+    {
+      $unwind: "$productCategory",
+    },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        description: 1,
+        price: 1,
+        sizes: 1,
+        colors: 1,
+        images: 1,
+        stock: 1,
+        category: {
+          name: "$productCategory.name",
+          description: "$productCategory.description",
+        },
+        totalImagesCount: 1,
+      },
+    },
+  ]);
+  if (!product || product.length === 0) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, product, `Product with Id: ${productId} is fetched`)
+    );
+});
+const getImageById = asyncHandler(async (req, res) => {
+  const { imageId } = req.params;
+  if (!imageId) {
+    throw new ApiError(400, "Enter Image Id to proceed");
+  }
+  const image = await Image.findById(imageId);
+  if (!image) {
+    throw new ApiError(404, "Image not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, image, `Image of Id: ${imageId} is fetched`));
+});
+
 export {
   addProduct,
   removeProduct,
   updateProductDetails,
   updateProductImagesAndColors,
   updateCurrentProductImageAndColor,
+  getAllProducts,
+  getProductById,
+  getImageById,
 };

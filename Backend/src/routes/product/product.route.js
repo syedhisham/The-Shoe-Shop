@@ -4,6 +4,9 @@ import { upload } from "../../middleware/multer.middleware.js";
 import { verifyAdmin } from "../../middleware/isAdmin.middleware.js";
 import {
   addProduct,
+  getAllProducts,
+  getImageById,
+  getProductById,
   removeProduct,
   updateCurrentProductImageAndColor,
   updateProductDetails,
@@ -11,7 +14,12 @@ import {
 } from "../../controllers/product/product.controller.js";
 
 const router = Router();
+// Routes
+router.route("/all-products").get(getAllProducts);
+router.route("/product-by-id/:productId").get(getProductById);
+router.route("/image-by-id/:imageId").get(getImageById);
 
+//Secure Routes
 router
   .route("/add-product")
   .post(upload.array("images", 20), verifyAdmin, verifyJWT, addProduct);
