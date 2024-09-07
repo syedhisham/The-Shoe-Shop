@@ -1,0 +1,411 @@
+import React, { useState } from "react";
+import axios from "axios";
+import { Input, Textarea } from "@material-tailwind/react";
+import SuccessToast from "../components/SuccessToast";
+import ErrorToast from "../components/ErrorToast";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const API_URL = "/api/products";
+const AddProductForm = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    stock: "",
+    sizes: [],
+    availableColors: [],
+  });
+  const [errors, setErrors] = useState({});
+  const [imageColorPairs, setImageColorPairs] = useState([
+    { image: null, color: "" },
+    { image: null, color: "" }, // Initial pairs
+  ]);
+  const [selectedFiles, setSelectedFiles] = useState([null, null]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSizesChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      sizes: e.target.value.split(",").map((size) => size.trim()),
+    }));
+  };
+
+  const handleAvailableColorsChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      availableColors: e.target.value.split(",").map((color) => color.trim()),
+    }));
+  };
+
+  const handleFileChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const newImageColorPairs = [...imageColorPairs];
+      newImageColorPairs[index].image = file;
+      setImageColorPairs(newImageColorPairs);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedFiles((prev) => {
+          const newFiles = [...prev];
+          newFiles[index] = reader.result;
+          return newFiles;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    setImageColorPairs((prev) => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleColorChange = (index, color) => {
+    const newImageColorPairs = [...imageColorPairs];
+    newImageColorPairs[index].color = color;
+    setImageColorPairs(newImageColorPairs);
+  };
+
+  const handleAddImageColorPair = () => {
+    setImageColorPairs([...imageColorPairs, { image: null, color: "" }]);
+    setSelectedFiles([...selectedFiles, null]);
+  };
+
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!formData.name.trim()) newErrors.name = "Product name is required.";
+
+    if (!formData.price || isNaN(formData.price) || formData.price <= 0)
+      newErrors.price = "Price must be a positive number.";
+
+    if (!formData.category.trim()) newErrors.category = "Category is required.";
+
+    if (!formData.stock || isNaN(formData.stock) || formData.stock < 0)
+      newErrors.stock = "Stock must be a non-negative number.";
+
+    if (!formData.sizes.length)
+      newErrors.sizes = "At least one size is required.";
+
+    if (!formData.availableColors.length)
+      newErrors.availableColors = "At least one color is required.";
+
+    if (imageColorPairs.some((pair) => !pair.image || !pair.color))
+      newErrors.imageColorPairs = "Each image must have a corresponding color.";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const addProduct = async (productData) => {
+    try {
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("name", productData.name);
+      formDataToSend.append("description", productData.description);
+      formDataToSend.append("price", productData.price);
+      formDataToSend.append("category", productData.category);
+      formDataToSend.append("stock", productData.stock);
+      formDataToSend.append("sizes", JSON.stringify(productData.sizes)); // Send sizes
+      formDataToSend.append(
+        "availableColors",
+        JSON.stringify(productData.availableColors)
+      );
+
+      imageColorPairs.forEach((pair) => {
+        if (pair.image) formDataToSend.append("images", pair.image);
+        formDataToSend.append("colors", pair.color);
+      });
+
+      const response = await axios.post(
+        `${API_URL}/add-product`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error adding product:",
+        error.response?.data || error.message
+      );
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    try {
+      await addProduct(formData);
+      SuccessToast("Product added successfully!");
+
+      setFormData({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        stock: "",
+        sizes: [],
+        availableColors: [],
+      });
+
+      setImageColorPairs([
+        { image: null, color: "" },
+        { image: null, color: "" },
+      ]);
+      setSelectedFiles([null, null]);
+      setErrors({});
+    } catch (error) {
+      ErrorToast("Error adding product. Please try again.");
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg">
+      <h2 className="text-2xl font-bold mb-6 text-center">Add New Product</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Input
+            type="text"
+            name="name"
+            id="name"
+            className="w-full px-4 py-2"
+            onChange={handleChange}
+            variant="outlined"
+            label="Product Name"
+            size="lg"
+            color="blue"
+            placeholder="Name of the product"
+            value={formData.name}
+            required
+          />
+          {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+        </div>
+
+        <div>
+          <Textarea
+            name="description"
+            id="description"
+            rows="3"
+            className="w-full px-4 py-2"
+            onChange={handleChange}
+            variant="outlined"
+            label="Description"
+            size="lg"
+            color="blue"
+            value={formData.description}
+          />
+          {errors.description && (
+            <p className="text-red-500 text-sm">{errors.description}</p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            type="number"
+            name="price"
+            id="price"
+            className="w-full px-4 py-2"
+            onChange={handleChange}
+            variant="outlined"
+            label="Price"
+            size="lg"
+            color="blue"
+            placeholder="Price of the product"
+            value={formData.price}
+            required
+          />
+          {errors.price && (
+            <p className="text-red-500 text-sm">{errors.price}</p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            type="text"
+            name="category"
+            id="category"
+            className="w-full px-4 py-2"
+            onChange={handleChange}
+            variant="outlined"
+            label="Category"
+            size="lg"
+            color="blue"
+            placeholder="Category of the product"
+            value={formData.category}
+            required
+          />
+          {errors.category && (
+            <p className="text-red-500 text-sm">{errors.category}</p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            type="number"
+            name="stock"
+            id="stock"
+            className="w-full px-4 py-2"
+            onChange={handleChange}
+            variant="outlined"
+            label="Stock"
+            size="lg"
+            color="blue"
+            placeholder="Stock of the product"
+            value={formData.stock}
+            required
+          />
+          {errors.stock && (
+            <p className="text-red-500 text-sm">{errors.stock}</p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            type="text"
+            name="sizes"
+            id="sizes"
+            className="w-full px-4 py-2"
+            onChange={handleSizesChange}
+            variant="outlined"
+            label="Sizes (Comma Separated)"
+            size="lg"
+            color="blue"
+            placeholder="e.g. 39, 42, 45"
+            value={formData.sizes.join(", ")}
+            required
+          />
+          {errors.sizes && (
+            <p className="text-red-500 text-sm">{errors.sizes}</p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            type="text"
+            name="availableColors"
+            id="availableColors"
+            className="w-full px-4 py-2"
+            onChange={handleAvailableColorsChange}
+            variant="outlined"
+            label="Available Colors (Comma Separated)"
+            size="lg"
+            color="blue"
+            placeholder="e.g., Red, Blue, Green"
+            value={formData.availableColors.join(", ")}
+            required
+          />
+          {errors.availableColors && (
+            <p className="text-red-500 text-sm">{errors.availableColors}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Upload Images with Colors{" "}
+            <span className="text-blue-500">
+              (At least two images can be selected)
+            </span>
+          </label>
+          {imageColorPairs.map((pair, index) => (
+            <div key={index} className="relative mb-4">
+              {/* Image Preview */}
+              {selectedFiles[index] && (
+                <div className="relative">
+                  <img
+                    src={selectedFiles[index]}
+                    alt={`Image Preview ${index + 1}`}
+                    className="w-80 h-60 object-cover rounded-md border mb-5"
+                  />
+                  <button
+                    type="button"
+                    className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-lg"
+                    onClick={() => handleRemoveImage(index)}
+                  >
+                    <svg
+                      className="w-6 h-6 text-red-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              )}
+
+              {!selectedFiles[index] && (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(index, e)}
+                  className="w-full mt-2 mb-2"
+                />
+              )}
+              <Input
+                type="text"
+                value={pair.color}
+                onChange={(e) => handleColorChange(index, e.target.value)}
+                className="w-full px-4 py-2"
+                variant="outlined"
+                label="Color"
+                size="lg"
+                color="blue"
+                placeholder="Color"
+                required
+              />
+              {errors[`imageColorPairs.${index}.color`] && (
+                <p className="text-red-500 text-sm">
+                  {errors[`imageColorPairs.${index}.color`]}
+                </p>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddImageColorPair}
+            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Add Another Image
+          </button>
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Add Product
+          </button>
+        </div>
+      </form>
+      <ToastContainer />
+    </div>
+  );
+};
+
+export default AddProductForm;
