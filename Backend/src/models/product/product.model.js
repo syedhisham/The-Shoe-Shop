@@ -12,7 +12,6 @@ const productSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
       trim: true,
       minlength: 10,
       maxlength: 2000,
@@ -25,15 +24,12 @@ const productSchema = new mongoose.Schema(
     sizes: [
       {
         type: String,
-        required: true,
       },
     ],
-    colors: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    colors: {
+      type: [String],
+      required: true,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -41,7 +37,8 @@ const productSchema = new mongoose.Schema(
     },
     images: [
       {
-        type: String,
+        type: mongoose.Types.ObjectId,
+        ref: "Image",
         required: true,
       },
     ],

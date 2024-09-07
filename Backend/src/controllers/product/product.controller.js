@@ -2,6 +2,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Product } from "../../models/product/product.model.js";
+import { Image } from "../../models/product/image.model.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
@@ -13,52 +14,62 @@ const addProduct = asyncHandler(async (req, res) => {
     description,
     price,
     sizes = [],
-    colors = [],
+    availableColors = [],
     category,
     stock,
   } = req.body;
 
-  if (
-    !name ||
-    !description ||
-    !price ||
-    !sizes ||
-    !colors ||
-    !category ||
-    !stock
-  ) {
-    throw new ApiError(401, "Enter all the details about the product");
-  }
+  const colors = req.body.colors || [];
+  const images = req.files || [];
 
-  const images = req.files;
+  if (!name || !price || colors.length === 0 || !category || !stock) {
+    throw new ApiError(400, "Fill the required fields");
+  }
   if (!images || images.length === 0) {
-    throw new ApiError(401, "Images are required");
+    throw new ApiError(400, "Images are required");
+  }
+  if (images.length !== colors.length) {
+    throw new ApiError(400, "Number of colors must match number of images");
   }
 
   const uploadPromises = images.map((file) => uploadOnCloudinary(file.path));
-  const uploadResults = await Promise.all(uploadPromises);
+  const resultOfUploadImagesOnCloudinary = await Promise.all(uploadPromises);
 
-  const imageUrls = uploadResults.map((result) => result.url);
-
-  const product = await Product.create({
+  const product = new Product({
     name,
     description,
     price,
     sizes,
-    colors,
+    colors: availableColors,
     category,
     stock,
-    images: imageUrls,
   });
+  const savedProduct = await product.save();
 
-  if (!product) {
-    throw new ApiError(500, "Something went wrong while adding the product");
-  }
+  const saveImageUrl = resultOfUploadImagesOnCloudinary.map(
+    (uploadedImage, index) => ({
+      productId: savedProduct._id,
+      color: colors[index], // Assign color from the colors array
+      imageUrl: uploadedImage.url,
+    })
+  );
+
+  const insertImages = await Image.insertMany(saveImageUrl);
+
+  savedProduct.images = insertImages.map((image) => image._id);
+  await savedProduct.save();
 
   return res
     .status(200)
-    .json(new ApiResponse(200, product, "Product added successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { savedProduct, insertImages },
+        "Product added successfully"
+      )
+    );
 });
+
 const removeProduct = asyncHandler(async (req, res) => {
   const { productId } = req.params;
   if (!productId) {
@@ -70,19 +81,22 @@ const removeProduct = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Product not found");
   }
 
-  if (productToDelete.images && productToDelete.images.length > 0) {
-    const imageDeletionPromises = productToDelete.images.map((imageUrl) =>
-      deleteFromCloudinary(imageUrl, "image")
-    );
-    const results = await Promise.all(imageDeletionPromises);
-
-    if (results.some((result) => !result)) {
-      throw new ApiError(
-        500,
-        "Some images could not be deleted from Cloudinary"
-      );
-    }
+  const productImagesToDelete = await Image.find({ productId });
+  if (!productImagesToDelete || productImagesToDelete.length === 0) {
+    throw new ApiError(500, "No images found for this product");
   }
+
+  const imageDeletionPromises = productImagesToDelete.map((image) =>
+    deleteFromCloudinary(image.imageUrl, "image")
+  );
+
+  const results = await Promise.all(imageDeletionPromises);
+
+  if (results.some((result) => !result)) {
+    throw new ApiError(500, "Some images could not be deleted from Cloudinary");
+  }
+
+  await Image.deleteMany({ productId });
 
   return res
     .status(200)
@@ -98,14 +112,22 @@ const updateProductDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Product ID is required");
   }
 
-  const { name, description, price, sizes, colors, category, stock } = req.body;
+  const {
+    name,
+    description,
+    price,
+    sizes = [],
+    availableColors = [],
+    category,
+    stock,
+  } = req.body;
 
   if (
     !name &&
     !description &&
-    !price &&
-    !sizes &&
-    !colors &&
+    price === undefined &&
+    !Array.isArray(sizes) &&
+    !Array.isArray(availableColors) &&
     !category &&
     !stock
   ) {
@@ -116,8 +138,8 @@ const updateProductDetails = asyncHandler(async (req, res) => {
   if (name) updateFields.name = name;
   if (description) updateFields.description = description;
   if (price !== undefined) updateFields.price = price;
-  if (sizes) updateFields.sizes = sizes;
-  if (colors) updateFields.colors = colors;
+  if (Array.isArray(sizes)) updateFields.sizes = sizes;
+  if (Array.isArray(availableColors)) updateFields.colors = availableColors;
   if (category) updateFields.category = category;
   if (stock !== undefined) updateFields.stock = stock;
 
@@ -153,17 +175,24 @@ const updateProductDetails = asyncHandler(async (req, res) => {
   }
 });
 
-const updateProductImages = asyncHandler(async (req, res) => {
-  const { productId } = req.params;
+const updateProductImagesAndColors = asyncHandler(async (req, res) => {
+  const colors = req.body.colors || [];
+  if (!colors || colors.length === 0) {
+    throw new ApiError(400, "Color should be selected for each product image");
+  }
 
+  const { productId } = req.params;
   if (!productId) {
     throw new ApiError(400, "Product ID is required");
   }
 
   const imagesLocalPath = req.files;
-
   if (!imagesLocalPath || imagesLocalPath.length === 0) {
     throw new ApiError(400, "No images selected to upload");
+  }
+
+  if (colors.length !== imagesLocalPath.length) {
+    throw new ApiError(400, "Each image must have a corresponding color");
   }
 
   let imagesToUploadOnCloudinaryUrl;
@@ -176,23 +205,21 @@ const updateProductImages = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to upload images to Cloudinary");
   }
 
-  const productImagesToUpdate = await Product.findById(productId);
-  if (!productImagesToUpdate) {
-    throw new ApiError(404, "Product not found");
+  const productImagesToUpdate = await Image.find({ productId });
+  if (!productImagesToUpdate || productImagesToUpdate.length === 0) {
+    throw new ApiError(404, "No images found for this product");
   }
-  console.log("productImagesToUpdate url", productImagesToUpdate.images);
 
-  const oldProductImages = productImagesToUpdate.images;
+  const oldProductImagesUrls = productImagesToUpdate.map(
+    (image) => image.imageUrl
+  );
 
-  productImagesToUpdate.images = imagesToUploadOnCloudinaryUrl;
-
-  await productImagesToUpdate.save({ validateBeforeSave: false });
-  console.log("Old Images path is ---->", oldProductImages.path);
-
-  if (oldProductImages && oldProductImages.length > 0) {
+  if (oldProductImagesUrls && oldProductImagesUrls.length > 0) {
     try {
       await Promise.all(
-        oldProductImages.map((file) => deleteFromCloudinary(file, "image"))
+        oldProductImagesUrls.map((imageUrl) =>
+          deleteFromCloudinary(imageUrl, "image")
+        )
       );
     } catch (error) {
       console.error("Error deleting old images from Cloudinary:", error);
@@ -203,15 +230,120 @@ const updateProductImages = asyncHandler(async (req, res) => {
     }
   }
 
+  await Image.deleteMany({ productId });
+
+  const productImagesAndColorsToUpdate = imagesToUploadOnCloudinaryUrl.map(
+    (uploadedImage, index) => ({
+      productId,
+      color: colors[index],
+      imageUrl: uploadedImage.url,
+    })
+  );
+
+  let insertImagesAndColors;
+  try {
+    insertImagesAndColors = await Image.insertMany(
+      productImagesAndColorsToUpdate
+    );
+  } catch (error) {
+    console.error("Error inserting new images into the database:", error);
+    throw new ApiError(500, "Failed to save new product images");
+  }
+
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        productImagesToUpdate,
-        "Product images updated successfully"
+        insertImagesAndColors,
+        "Product images and their corresponding colors are updated successfully"
       )
     );
 });
 
-export { addProduct, removeProduct, updateProductDetails, updateProductImages };
+const updateCurrentProductImageAndColor = asyncHandler(async (req, res) => {
+  const { color } = req.body;
+  if (!color) {
+    throw new ApiError(400, "Enter the color of the image");
+  }
+
+  const { imageId } = req.params;
+  if (!imageId) {
+    throw new ApiError(400, "Select the image to update");
+  }
+
+  const imageFile = req.file;
+  if (!imageFile) {
+    throw new ApiError(400, "Select an image to update");
+  }
+
+  let uploadCurrentImageOnCloudinary;
+  try {
+    uploadCurrentImageOnCloudinary = await uploadOnCloudinary(imageFile.path);
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    throw new ApiError(
+      500,
+      "Something went wrong while uploading the image to Cloudinary"
+    );
+  }
+
+  if (!uploadCurrentImageOnCloudinary) {
+    throw new ApiError(500, "Failed to upload image to Cloudinary");
+  }
+
+  const oldImage = await Image.findById(imageId);
+  if (!oldImage) {
+    throw new ApiError(404, "Image not found");
+  }
+
+  const imageToDelete = oldImage.imageUrl;
+
+  if (imageToDelete && imageToDelete.length !== 0) {
+    try {
+      await deleteFromCloudinary(imageToDelete, "image");
+    } catch (error) {
+      console.error("Error deleting old image from Cloudinary:", error);
+      throw new ApiError(
+        500,
+        "Something went wrong while deleting the old image from Cloudinary"
+      );
+    }
+  }
+
+  let imageAndColorToUpdate;
+  try {
+    imageAndColorToUpdate = await Image.findByIdAndUpdate(
+      imageId,
+      {
+        color,
+        imageUrl: uploadCurrentImageOnCloudinary.url,
+      },
+      { new: true }
+    );
+  } catch (error) {
+    console.error("Error updating image and color in database:", error);
+    throw new ApiError(
+      500,
+      "Something went wrong while updating the image and color in the database"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        imageAndColorToUpdate,
+        "Image and its color updated successfully"
+      )
+    );
+});
+
+export {
+  addProduct,
+  removeProduct,
+  updateProductDetails,
+  updateProductImagesAndColors,
+  updateCurrentProductImageAndColor,
+};

@@ -5,15 +5,16 @@ import { verifyAdmin } from "../../middleware/isAdmin.middleware.js";
 import {
   addProduct,
   removeProduct,
+  updateCurrentProductImageAndColor,
   updateProductDetails,
-  updateProductImages,
+  updateProductImagesAndColors,
 } from "../../controllers/product/product.controller.js";
 
 const router = Router();
 
 router
   .route("/add-product")
-  .post(upload.array("images", 4), verifyAdmin, verifyJWT, addProduct);
+  .post(upload.array("images", 20), verifyAdmin, verifyJWT, addProduct);
 router
   .route("/remove-product/:productId")
   .delete(verifyAdmin, verifyJWT, removeProduct);
@@ -23,10 +24,18 @@ router
 router
   .route("/update-product-images/:productId")
   .patch(
-    upload.array("images", 4),
+    upload.array("images", 20),
     verifyAdmin,
     verifyJWT,
-    updateProductImages
+    updateProductImagesAndColors
+  );
+router
+  .route("/update-current-product-image/:imageId")
+  .patch(
+    upload.single("image"),
+    verifyAdmin,
+    verifyJWT,
+    updateCurrentProductImageAndColor
   );
 
 export default router;
