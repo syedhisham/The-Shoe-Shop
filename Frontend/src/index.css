@@ -4,6 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+  font-family: "Montserrat", sans-serif;
+}
+.montserrat {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
 .hide-scroll-bar::-webkit-scrollbar {
     display: none;
   }
