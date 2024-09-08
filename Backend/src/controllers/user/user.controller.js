@@ -159,5 +159,15 @@ const getUserFirstName = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user.firstName, "User First Name fetched"));
 });
+const getUserDetails = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User Details fetched"));
+});
 
-export { registerUser, loginUser, logoutUser, getUserFirstName };
+
+export { registerUser, loginUser, logoutUser, getUserFirstName, getUserDetails };
