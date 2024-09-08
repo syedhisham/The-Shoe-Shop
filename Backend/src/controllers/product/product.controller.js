@@ -342,74 +342,121 @@ const updateCurrentProductImageAndColor = asyncHandler(async (req, res) => {
 });
 
 const getAllProducts = asyncHandler(async (req, res) => {
-  try {
-    const allProducts = await Product.aggregate([
-      {
-        $lookup: {
-          from: "images",
-          localField: "_id",
-          foreignField: "productId",
-          as: "productImages",
-        },
-      },
-      {
-        $unwind: {
-          path: "$productImages",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          name: { $first: "$name" },
-          description: { $first: "$description" },
-          price: { $first: "$price" },
-          sizes: { $first: "$sizes" },
-          colors: { $first: "$colors" },
-          category: { $first: "$category" },
-          stock: { $first: "$stock" },
-          images: { $push: "$productImages.imageUrl" },
-          totalImagesCount: { $sum: 1 },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          name: 1,
-          description: 1,
-          price: 1,
-          sizes: 1,
-          colors: 1,
-          category: 1,
-          stock: 1,
-          images: 1,
-          totalImagesCount: 1,
-        },
-      },
-    ]);
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortType = "desc",
+  } = req.query;
 
-    if (!allProducts || allProducts.length === 0) {
-      throw new ApiError(404, "No products found");
-    }
-    const totalNumberOfProducts = await Product.countDocuments();
+  const options = {
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+    sort: { [sortBy]: sortType === "desc" ? -1 : 1 },
+  };
 
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        {
-          TotalProducts: totalNumberOfProducts,
-          ProductDetails: allProducts,
-        },
-        "All products and their images are fetched successfully"
-      )
-    );
-  } catch (error) {
-    console.error("Error fetching products and images:", error);
-    throw new ApiError(
-      500,
-      "Something went wrong while fetching products and images"
-    );
+  const aggregateQuery = Product.aggregate([
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "categoryDetails",
+      },
+    },
+    {
+      $unwind: {
+        path: "$categoryDetails",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "categoryDetails.parent",
+        foreignField: "_id",
+        as: "parentCategoryDetails",
+      },
+    },
+    {
+      $unwind: {
+        path: "$parentCategoryDetails",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: "images",
+        localField: "_id",
+        foreignField: "productId",
+        as: "productImages",
+      },
+    },
+    {
+      $unwind: {
+        path: "$productImages",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        name: { $first: "$name" },
+        description: { $first: "$description" },
+        price: { $first: "$price" },
+        sizes: { $first: "$sizes" },
+        colors: { $first: "$colors" },
+        category: { $first: "$categoryDetails._id" },
+        categoryName: { $first: "$categoryDetails.name" },
+        categoryParent: { $first: "$categoryDetails.parent" },
+        categoryParentName: { $first: "$parentCategoryDetails.name" },
+        stock: { $first: "$stock" },
+        images: { $push: "$productImages.imageUrl" },
+        createdAt: { $first: "$createdAt" },
+        updatedAt: { $first: "$updatedAt" },
+        totalImagesCount: { $sum: 1 },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        description: 1,
+        price: 1,
+        sizes: 1,
+        colors: 1,
+        category: 1,
+        categoryName: 1,
+        categoryParent: 1,
+        categoryParentName: 1,
+        stock: 1,
+        images: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        totalImagesCount: 1,
+      },
+    },
+  ]);
+
+  const result = await Product.aggregatePaginate(aggregateQuery, options);
+
+  if (!result.docs || result.docs.length === 0) {
+    throw new ApiError(404, "No products found");
   }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        TotalProducts: result.totalDocs,
+        ProductsPerPage: result.limit,
+        TotalPages: result.totalPages,
+        CurrentPage: result.page,
+        ProductDetails: result.docs,
+      },
+      "Products fetched successfully with pagination"
+    )
+  );
 });
 
 const getProductById = asyncHandler(async (req, res) => {
