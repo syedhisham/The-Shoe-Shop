@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import logo from "../assets/webs-log.png";
-
+import AvatarWithUserDropdown from "../components/AvatarWithUserDropdown";
 import {
   Navbar,
   Collapse,
@@ -17,7 +17,6 @@ import {
 } from "@material-tailwind/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
-import Logout from "./Logout";
 import axios from "axios";
 
 const gentsFootWearMenuItems = [
@@ -111,7 +110,6 @@ export function Header() {
   const [openNav, setOpenNav] = useState(false);
   const [navbarPosition, setNavbarPosition] = useState("top-8");
   const [navbarHeight, setNavbarHeight] = useState("h-[8rem]");
-  const [logoHeight, setLogoHeight] = useState("h-20");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userFirstName, setUserFirstName] = useState(null);
 
@@ -138,11 +136,9 @@ export function Header() {
       if (window.scrollY > 50) {
         setNavbarPosition("top-0");
         setNavbarHeight("h-[4rem]");
-        setLogoHeight("h-20");
       } else {
         setNavbarPosition("top-8");
         setNavbarHeight("h-[8rem]");
-        setLogoHeight("h-36");
       }
     };
 
@@ -162,7 +158,7 @@ export function Header() {
 
   return (
     <div>
-      <h1 className="flex bg-red-900 text-white h-8 justify-center items-center">
+      <h1 className="flex bg-blue-800 text-white h-8 justify-center items-center">
         Free Delivery on order Rs.3000/-or above
       </h1>
       <Navbar
@@ -171,42 +167,42 @@ export function Header() {
         <div className="flex items-center justify-between text-blue-gray-900 h-full">
           <div>
             <img
-              className={`transition-all duration-300 ${logoHeight}`}
+              className={`w-24 sm:w-22 md:w-40 lg:w-30 xl:w-40 2xl:w-54 h-auto transition-all duration-300`}
               src={logo}
-              alt=""
+              alt="Logo"
             />
           </div>
+
           <div className="flex flex-1 items-center gap-4 justify-center">
             <div className="hidden lg:block">
               <NavList />
             </div>
-            <Typography className="hidden lg:block">
+            <Typography className="hidden lg:block text-sm">
               Track Your Order
             </Typography>
           </div>
-          <div className="hidden gap-2 lg:flex items-center">
-            <div className="flex space-x-4">
-              {isAuthenticated ? (
-                <>
-                  {userFirstName && (
-                    <Typography className="flex items-center">
-                      Hello, {userFirstName}
-                    </Typography>
-                  )}
-                  <Logout onLogout={() => setIsAuthenticated(false)} />{" "}
-                  {/* Pass callback to update state */}
-                </>
-              ) : (
-                <>
-                  <NavLink to="/login">
-                    <Button variant="outlined">Log In</Button>
-                  </NavLink>
-                  <NavLink to="/register">
-                    <Button variant="outlined">Sign Up</Button>
-                  </NavLink>
-                </>
-              )}
-            </div>
+          <div className="flex space-x-4">
+            {isAuthenticated ? (
+              <>
+                {userFirstName && (
+                  <Typography className="flex items-center mr-5">
+                    {userFirstName}
+                  </Typography>
+                )}
+                {/* <Logout onLogout={() => setIsAuthenticated(false)} />{" "} */}
+              </>
+            ) : (
+              <>
+                <NavLink to="/login">
+                  <Button variant="outlined">Log In</Button>
+                </NavLink>
+                <NavLink to="/register">
+                  <Button variant="outlined">Sign Up</Button>
+                </NavLink>
+              </>
+            )}
+          </div>
+          <div className="hidden gap-2 lg:flex items-center mr-2">
             <IconButton className="bg-white">
               <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
@@ -214,6 +210,7 @@ export function Header() {
               <CiShoppingCart style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
           </div>
+          <div className="flex items-center">
           <IconButton
             variant="text"
             color="blue-gray"
@@ -226,6 +223,10 @@ export function Header() {
               <Bars3Icon className="h-6 w-6" strokeWidth={2} />
             )}
           </IconButton>
+          <div className="w-full flex items-center justify-center">
+            <AvatarWithUserDropdown />
+          </div>
+          </div>
         </div>
         <Collapse open={openNav}>
           <div className="bg-white pb-5">
@@ -233,24 +234,6 @@ export function Header() {
             <Typography className="text-black -mt-5 mb-2 ml-3">
               Track Your Order
             </Typography>
-            <div className="flex flex-wrap gap-3 mt-5 mb-5">
-              <NavLink to="/login">
-                <Button
-                  variant="outlined"
-                  className="h-8 flex items-center justify-center text-sm sm:text-base"
-                >
-                  Log In
-                </Button>
-              </NavLink>
-              <NavLink to="/register">
-                <Button
-                  variant="outlined"
-                  className="h-8 flex items-center justify-center text-sm sm:text-base"
-                >
-                  Sign Up
-                </Button>
-              </NavLink>
-            </div>
             <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
               <IconButton className="bg-white">
                 <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
