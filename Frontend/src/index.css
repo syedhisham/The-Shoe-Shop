@@ -1,10 +1,8 @@
-/* @import '@material-tailwind/react/dist/material-tailwind.css'; Adjust path if necessary */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-*{
+* {
   font-family: "Montserrat", sans-serif;
 }
 .montserrat {
@@ -13,11 +11,27 @@
   font-weight: 400;
   font-style: normal;
 }
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 .hide-scroll-bar::-webkit-scrollbar {
-    display: none;
+  display: none;
+}
+
+.hide-scroll-bar {
+  -ms-overflow-style: none; 
+  scrollbar-width: none; 
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-  
-  .hide-scroll-bar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+  100% {
+    transform: rotate(360deg);
   }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

@@ -8,14 +8,14 @@ import {
   MenuList,
   Typography,
 } from "@material-tailwind/react";
-import {
-  Cog6ToothIcon,
-  InboxArrowDownIcon,
-  LifebuoyIcon,
-  PowerIcon,
-  UserCircleIcon,
-  ShieldCheckIcon,
-} from "@heroicons/react/24/solid";
+
+import { FaCog } from "react-icons/fa";
+import { AiOutlineDownload } from "react-icons/ai";
+import { IoHelpCircleSharp } from "react-icons/io5";
+import { FaPowerOff } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
+import { RiShieldCheckFill } from "react-icons/ri";
+
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -25,23 +25,23 @@ import avatarGif2 from "../assets/boypic.avif";
 const profileMenuItemsBase = [
   {
     label: "My Profile",
-    icon: UserCircleIcon,
+    icon: FaUserCircle,
   },
   {
     label: "Edit Profile",
-    icon: Cog6ToothIcon,
+    icon: FaCog,
   },
   {
     label: "Inbox",
-    icon: InboxArrowDownIcon,
+    icon: AiOutlineDownload,
   },
   {
     label: "Help",
-    icon: LifebuoyIcon,
+    icon: IoHelpCircleSharp,
   },
 ];
 
-export default function AvatarWithUserDropdown() {
+const AvatarWithUserDropdown = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ export default function AvatarWithUserDropdown() {
       toast.error("Error logging out. Please try again.");
     }
   };
-
+  
   const handleMenuItemClick = (label) => {
     if (label === "Sign Out") {
       handleLogout();
@@ -83,20 +83,19 @@ export default function AvatarWithUserDropdown() {
   };
 
   const closeMenu = () => setIsMenuOpen(false);
-
   const profileMenuItems = [
     ...profileMenuItemsBase,
     ...(isAdmin
       ? [
           {
             label: "Admin Panel",
-            icon: ShieldCheckIcon,
+            icon: RiShieldCheckFill,
           },
         ]
       : []),
     {
       label: "Sign Out",
-      icon: PowerIcon,
+      icon: FaPowerOff,
     },
   ];
 
@@ -157,3 +156,4 @@ export default function AvatarWithUserDropdown() {
     </Menu>
   );
 }
+export default AvatarWithUserDropdown

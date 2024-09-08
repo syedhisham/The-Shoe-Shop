@@ -15,7 +15,7 @@ import {
   MenuItem,
   Button,
 } from "@material-tailwind/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import { HiBars3, HiOutlineXMark } from "react-icons/hi2";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
 import axios from "axios";
 
@@ -60,7 +60,6 @@ function NavListMenu({ label, menuItems }) {
       </MenuItem>
     </a>
   ));
-
   return (
     <React.Fragment>
       <Menu
@@ -106,7 +105,7 @@ function NavList() {
   );
 }
 
-export function Header() {
+const Header = () => {
   const [openNav, setOpenNav] = useState(false);
   const [navbarPosition, setNavbarPosition] = useState("top-8");
   const [navbarHeight, setNavbarHeight] = useState("h-[8rem]");
@@ -128,7 +127,6 @@ export function Header() {
         setIsAuthenticated(false);
       }
     };
-
     fetchUserFirstName();
   }, []);
   useEffect(() => {
@@ -141,9 +139,7 @@ export function Header() {
         setNavbarHeight("h-[8rem]");
       }
     };
-
     window.addEventListener("scroll", handleScroll);
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
@@ -189,21 +185,37 @@ export function Header() {
                     {userFirstName}
                   </Typography>
                 )}
-                {/* <Logout onLogout={() => setIsAuthenticated(false)} />{" "} */}
               </>
             ) : (
               <>
                 <NavLink to="/login">
-                  <Button variant="outlined">Log In</Button>
+                  <div className="flex justify-center items-center">
+                    <div className="w-[6px] h-10 bg-blue-800 rounded-l-3xl sm:h-9 md:h-9 "></div>
+                    <Typography
+                      variant="text"
+                      className="p-2 text-sm sm:text-sm md:text-sm lg:lg xl:lg "
+                    >
+                      Sign in
+                    </Typography>
+                  </div>
                 </NavLink>
+
                 <NavLink to="/register">
-                  <Button variant="outlined">Sign Up</Button>
+                  <div className="flex justify-center items-center">
+                    <div className="w-[6px] h-10 bg-blue-800 rounded-l-3xl sm:h-9 md:h-9 "></div>
+                    <Typography
+                      variant="text"
+                      className="p-2 text-sm sm:text-sm md:text-sm lg:lg xl:lg "
+                    >
+                      Sign Up
+                    </Typography>
+                  </div>
                 </NavLink>
               </>
             )}
           </div>
           <div className="hidden gap-2 lg:flex items-center mr-2">
-            <IconButton className="bg-white">
+            <IconButton className="bg-white ml-5">
               <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
             <IconButton className="bg-white">
@@ -211,21 +223,25 @@ export function Header() {
             </IconButton>
           </div>
           <div className="flex items-center">
-          <IconButton
-            variant="text"
-            color="blue-gray"
-            className="lg:hidden"
-            onClick={() => setOpenNav(!openNav)}
-          >
-            {openNav ? (
-              <XMarkIcon className="h-6 w-6" strokeWidth={2} />
+            <IconButton
+              variant="text"
+              color="blue-gray"
+              className="lg:hidden"
+              onClick={() => setOpenNav(!openNav)}
+            >
+              {openNav ? (
+                <HiOutlineXMark className="h-6 w-6" strokeWidth={2} />
+              ) : (
+                <HiBars3 className="h-6 w-6" strokeWidth={2} />
+              )}
+            </IconButton>
+            {isAuthenticated ? (
+              <div className="w-full flex items-center justify-center">
+                <AvatarWithUserDropdown />
+              </div>
             ) : (
-              <Bars3Icon className="h-6 w-6" strokeWidth={2} />
+              ""
             )}
-          </IconButton>
-          <div className="w-full flex items-center justify-center">
-            <AvatarWithUserDropdown />
-          </div>
           </div>
         </div>
         <Collapse open={openNav}>
@@ -245,9 +261,8 @@ export function Header() {
           </div>
         </Collapse>
       </Navbar>
-      <div className="pt-[8rem]">
-        {/* Content below the navbar starts here */}
-      </div>
+      <div className="pt-[8rem]"></div>
     </div>
   );
-}
+};
+export default Header;
