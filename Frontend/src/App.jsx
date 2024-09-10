@@ -9,6 +9,9 @@ import ProductList from "./components/ProductCards";
 import UserList from "./components/UserList";
 import UserDeleteList from "./components/UserDeleteList";
 import MostActiveUsers from "./components/MostActiveUsers";
+import ManageProducts from "./pages/ManageProducts";
+import ProductUpdateForm from "./pages/ProductUpdateForm";
+import ProductUpdateImage from "./pages/ProductUpdateImage";
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="/addProduct" element={<AddProductForm />} />
         <Route path="/adminPanel" element={<AdminPanel />} />
         <Route path="/productCards" element={<ProductList />} />
+        <Route path="/manageProducts" element={<ManageProducts />} />
+        <Route path="/updateProductDetails" element={<ProductUpdateForm />} />
+        <Route path="/updateProductImages" element={<ProductUpdateImage />} />
         <Route path="/allUsers" element={<UserList />} />
         <Route path="/removeUser" element={<UserDeleteList />} />
         <Route path="/mostActiveUsers" element={<MostActiveUsers />} />

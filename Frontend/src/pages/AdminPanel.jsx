@@ -3,10 +3,10 @@ import { FaHome, FaUsers, FaShoppingBag, FaCog } from "react-icons/fa";
 import { MdArchive } from "react-icons/md";
 import { FaBars, FaTimes } from "react-icons/fa";
 import AddProductForm from "../components/AddProductForm";
-import ProductList from "../components/ProductCards";
 import UserList from "../components/UserList";
 import UserDeleteList from "../components/UserDeleteList";
 import MostActiveUsers from "../components/MostActiveUsers";
+import ManageProducts from "./ManageProducts";
 
 const sidebarItems = [
   { label: "Dashboard", icon: FaHome, component: <div>Dashboard</div> },
@@ -18,15 +18,7 @@ const sidebarItems = [
 
 const productManagementItems = [
   { label: "Add Product", component: <AddProductForm /> },
-  { label: "Delete Products", component: <ProductList /> },
-  {
-    label: "Update Product Details",
-    component: <div>Update Product Details Component</div>,
-  },
-  {
-    label: "Update Product Images and Colors",
-    component: <div>Update Product Images and Colors Component</div>,
-  },
+  { label: "Manage Products", component: <ManageProducts /> },
   { label: "All Products", component: <div>All Products Component</div> },
 ];
 
@@ -138,7 +130,7 @@ const AdminPanel = () => {
                       <ul
                         className={`ml-8 mt-2 space-y-2 transition-all duration-300 ease-in-out ${
                           isProductDropdownOpen
-                            ? "max-h-40 opacity-100 mb-[6rem]"
+                            ? "max-h-40 opacity-100 mb-3"
                             : "max-h-0 opacity-0 overflow-hidden"
                         }`}
                       >
