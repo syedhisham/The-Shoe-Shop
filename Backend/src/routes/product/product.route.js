@@ -8,7 +8,6 @@ import {
   getImageById,
   getProductById,
   removeProduct,
-  updateCurrentProductImageAndColor,
   updateProductDetails,
   updateProductImagesAndColors,
 } from "../../controllers/product/product.controller.js";
@@ -36,14 +35,6 @@ router
     verifyAdmin,
     verifyJWT,
     updateProductImagesAndColors
-  );
-router
-  .route("/update-current-product-image/:imageId")
-  .patch(
-    upload.single("image"),
-    verifyAdmin,
-    verifyJWT,
-    updateCurrentProductImageAndColor
   );
 
 export default router;

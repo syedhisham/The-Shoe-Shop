@@ -123,15 +123,16 @@ const updateProductDetails = asyncHandler(async (req, res) => {
     stock,
   } = req.body;
 
-  if (
-    !name &&
-    !description &&
-    price === undefined &&
-    !Array.isArray(sizes) &&
-    !Array.isArray(availableColors) &&
-    !category &&
-    !stock
-  ) {
+  const hasFieldsToUpdate =
+    name ||
+    description ||
+    price !== undefined ||
+    sizes.length > 0 ||
+    availableColors.length > 0 ||
+    category ||
+    stock !== undefined;
+
+  if (!hasFieldsToUpdate) {
     throw new ApiError(400, "At least one field must be provided to update");
   }
 
@@ -139,8 +140,9 @@ const updateProductDetails = asyncHandler(async (req, res) => {
   if (name) updateFields.name = name;
   if (description) updateFields.description = description;
   if (price !== undefined) updateFields.price = price;
-  if (Array.isArray(sizes)) updateFields.sizes = sizes;
-  if (Array.isArray(availableColors)) updateFields.colors = availableColors;
+  if (Array.isArray(sizes) && sizes.length > 0) updateFields.sizes = sizes;
+  if (Array.isArray(availableColors) && availableColors.length > 0)
+    updateFields.availableColors = availableColors;
   if (category) updateFields.category = category;
   if (stock !== undefined) updateFields.stock = stock;
 
@@ -166,6 +168,7 @@ const updateProductDetails = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     if (error.name === "ValidationError") {
+      console.error("Validation error details:", error.errors);
       throw new ApiError(400, "Invalid product data provided");
     }
     console.error("Error updating product details:", error);
@@ -262,84 +265,6 @@ const updateProductImagesAndColors = asyncHandler(async (req, res) => {
     );
 });
 
-const updateCurrentProductImageAndColor = asyncHandler(async (req, res) => {
-  const { color } = req.body;
-  if (!color) {
-    throw new ApiError(400, "Enter the color of the image");
-  }
-
-  const { imageId } = req.params;
-  if (!imageId) {
-    throw new ApiError(400, "Select the image to update");
-  }
-
-  const imageFile = req.file;
-  if (!imageFile) {
-    throw new ApiError(400, "Select an image to update");
-  }
-
-  let uploadCurrentImageOnCloudinary;
-  try {
-    uploadCurrentImageOnCloudinary = await uploadOnCloudinary(imageFile.path);
-  } catch (error) {
-    console.error("Error uploading image to Cloudinary:", error);
-    throw new ApiError(
-      500,
-      "Something went wrong while uploading the image to Cloudinary"
-    );
-  }
-
-  if (!uploadCurrentImageOnCloudinary) {
-    throw new ApiError(500, "Failed to upload image to Cloudinary");
-  }
-
-  const oldImage = await Image.findById(imageId);
-  if (!oldImage) {
-    throw new ApiError(404, "Image not found");
-  }
-
-  const imageToDelete = oldImage.imageUrl;
-
-  if (imageToDelete && imageToDelete.length !== 0) {
-    try {
-      await deleteFromCloudinary(imageToDelete, "image");
-    } catch (error) {
-      console.error("Error deleting old image from Cloudinary:", error);
-      throw new ApiError(
-        500,
-        "Something went wrong while deleting the old image from Cloudinary"
-      );
-    }
-  }
-
-  let imageAndColorToUpdate;
-  try {
-    imageAndColorToUpdate = await Image.findByIdAndUpdate(
-      imageId,
-      {
-        color,
-        imageUrl: uploadCurrentImageOnCloudinary.url,
-      },
-      { new: true }
-    );
-  } catch (error) {
-    console.error("Error updating image and color in database:", error);
-    throw new ApiError(
-      500,
-      "Something went wrong while updating the image and color in the database"
-    );
-  }
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        imageAndColorToUpdate,
-        "Image and its color updated successfully"
-      )
-    );
-});
 
 const getAllProducts = asyncHandler(async (req, res) => {
   const {
@@ -556,7 +481,6 @@ export {
   removeProduct,
   updateProductDetails,
   updateProductImagesAndColors,
-  updateCurrentProductImageAndColor,
   getAllProducts,
   getProductById,
   getImageById,

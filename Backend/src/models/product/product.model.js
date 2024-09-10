@@ -5,7 +5,6 @@ const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
       minlength: 2,
       maxlength: 100,
@@ -17,7 +16,6 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: true,
       min: 0,
     },
     sizes: [
@@ -27,23 +25,19 @@ const productSchema = new mongoose.Schema(
     ],
     colors: {
       type: [String],
-      required: true,
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: true,
     },
     images: [
       {
         type: mongoose.Types.ObjectId,
         ref: "Image",
-        required: true,
       },
     ],
     stock: {
       type: Number,
-      required: true,
       min: 0,
     },
   },
