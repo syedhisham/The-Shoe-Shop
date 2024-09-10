@@ -23,6 +23,17 @@ const generateAccessAndRefreshTokens = async (userId) => {
     );
   }
 };
+
+const updateActivityScoreOnLogin = async (userId) => {
+  try {
+    await User.findByIdAndUpdate(userId, {
+      $inc: { activityScore: 10 }, // Increment score by 10 for login
+    });
+  } catch (error) {
+    console.error("Error updating activity score on login:", error);
+  }
+};
+
 const registerUser = asyncHandler(async (req, res) => {
   const {
     firstName,
@@ -70,6 +81,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, createUser, "User Created successfuly"));
 });
+
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -104,6 +116,8 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 
   delete loggedInUser.auth;
+
+  await updateActivityScoreOnLogin(user._id);
 
   const cookieOptions = {
     httpOnly: true,
@@ -168,6 +182,123 @@ const getUserDetails = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, user, "User Details fetched"));
 });
+const getAllUsers = asyncHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortType = "desc",
+  } = req.query;
 
+  const aggregationPipeline = [
+    {
+      $lookup: {
+        from: "contacts",
+        localField: "contact",
+        foreignField: "_id",
+        as: "userContactDetails",
+      },
+    },
+    {
+      $unwind: {
+        path: "$userContactDetails",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        firstName: { $first: "$firstName" },
+        lastName: { $first: "$lastName" },
+        email: { $first: "$email" },
+        gender: { $first: "$gender" },
+        contactInfo: { $first: "$userContactDetails.phone" },
+        registeredDate: { $first: "$createdAt" },
+        activityScore: { $first: "$activityScore" },
+        updatedDate: { $first: "$updatedAt" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        firstName: 1,
+        lastName: 1,
+        email: 1,
+        gender: 1,
+        contactInfo: 1,
+        registeredDate: 1,
+        activityScore: 1,
+        updatedDate: 1,
+      },
+    },
+  ];
 
-export { registerUser, loginUser, logoutUser, getUserFirstName, getUserDetails };
+  const options = {
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+    sort: { [sortBy]: sortType === "desc" ? -1 : 1 },
+  };
+
+  const allUsers = await User.aggregatePaginate(
+    User.aggregate(aggregationPipeline),
+    options
+  );
+
+  if (!allUsers.docs || allUsers.docs.length === 0) {
+    throw new ApiError(404, "No users found");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { allUsers: allUsers.docs, totalUsers: allUsers.totalDocs },
+        "All users are fetched"
+      )
+    );
+});
+const removeUser = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  console.log(userId);
+
+  if (!userId) {
+    throw new ApiError(
+      400,
+      "User Id is required to proceed to delete the user"
+    );
+  }
+  const deleteUser = await User.findByIdAndDelete(userId);
+  if (!deleteUser) {
+    throw new ApiError(404, "User not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, deleteUser, "The user deleted successfuly"));
+});
+const getMostActiveUsers = asyncHandler(async (req, res) => {
+  const mostActiveUsers = await User.find({})
+    .sort({ activityScore: -1 })
+    .limit(10);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { data: mostActiveUsers },
+        "Most active user fetched"
+      )
+    );
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUserFirstName,
+  getUserDetails,
+  getAllUsers,
+  removeUser,
+  getMostActiveUsers,
+};
