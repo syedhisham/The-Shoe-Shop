@@ -12,6 +12,7 @@ import ErrorToast from "../components/ErrorToast";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import LoadingOverlay from "../components/LoadingOverlay";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -53,7 +54,7 @@ const Register = () => {
       });
       setTimeout(() => {
         navigate("/login");
-      }, 2000);
+      }, 1500);
     } catch (error) {
       console.error(error);
       ErrorToast("Error registering user. Please try again.");
@@ -65,11 +66,7 @@ const Register = () => {
   return (
     <div className="relative max-w-4xl mx-auto my-10 p-8 bg-white shadow-xl rounded-lg transform transition duration-500 hover:shadow-2xl">
       <ToastContainer />
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-blue-500 bg-opacity-30 z-50 backdrop-blur-sm">
-          <Spinner className="h-16 w-16 text-blue-600" />
-        </div>
-      )}
+      {loading && <LoadingOverlay />}
       <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">
         Register
       </h2>
