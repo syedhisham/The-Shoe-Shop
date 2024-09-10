@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Carousel, Spinner } from "@material-tailwind/react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import SuccessToast from "../components/SuccessToast";
-import ErrorToast from "../components/ErrorToast";
+import SuccessToast from "./SuccessToast";
+import ErrorToast from "./ErrorToast";
 import axios from "axios";
 
 const ProductCard = ({ product, onDelete }) => {

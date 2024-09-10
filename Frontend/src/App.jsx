@@ -5,7 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import AddProductForm from "./components/AddProductForm";
 import AdminPanel from "./pages/AdminPanel";
-import ProductList from "./pages/ProductCards";
+import ProductList from "./components/ProductCards";
 import UserList from "./components/UserList";
 import UserDeleteList from "./components/UserDeleteList";
 import MostActiveUsers from "./components/MostActiveUsers";

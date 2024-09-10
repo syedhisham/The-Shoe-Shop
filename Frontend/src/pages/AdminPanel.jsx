@@ -3,7 +3,7 @@ import { FaHome, FaUsers, FaShoppingBag, FaCog } from "react-icons/fa";
 import { MdArchive } from "react-icons/md";
 import { FaBars, FaTimes } from "react-icons/fa";
 import AddProductForm from "../components/AddProductForm";
-import ProductList from "./ProductCards";
+import ProductList from "../components/ProductCards";
 import UserList from "../components/UserList";
 import UserDeleteList from "../components/UserDeleteList";
 import MostActiveUsers from "../components/MostActiveUsers";
