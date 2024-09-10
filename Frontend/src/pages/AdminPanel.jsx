@@ -4,6 +4,9 @@ import { MdArchive } from "react-icons/md";
 import { FaBars, FaTimes } from "react-icons/fa";
 import AddProductForm from "../components/AddProductForm";
 import ProductList from "./ProductCards";
+import UserList from "../components/UserList";
+import UserDeleteList from "../components/UserDeleteList";
+import MostActiveUsers from "../components/MostActiveUsers";
 
 const sidebarItems = [
   { label: "Dashboard", icon: FaHome, component: <div>Dashboard</div> },
@@ -28,8 +31,30 @@ const productManagementItems = [
 ];
 
 const userManagementItems = [
-  { label: "Delete Users", component: <div>Delete Users Component</div> },
-  { label: "All Users", component: <div>All Users Component</div> },
+  {
+    label: "All Users",
+    component: (
+      <div>
+        <UserList />
+      </div>
+    ),
+  },
+  {
+    label: "Most Active Users",
+    component: (
+      <div>
+        <MostActiveUsers />
+      </div>
+    ),
+  },
+  {
+    label: "Delete Users",
+    component: (
+      <div>
+        <UserDeleteList />
+      </div>
+    ),
+  },
 ];
 
 const orderManagementItems = [
