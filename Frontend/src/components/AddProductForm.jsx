@@ -5,6 +5,7 @@ import SuccessToast from "../components/SuccessToast";
 import ErrorToast from "../components/ErrorToast";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import LoadingOverlay from "./LoadingOverlay";
 
 const API_URL = "/api/products";
 const AddProductForm = () => {
@@ -20,9 +21,10 @@ const AddProductForm = () => {
   const [errors, setErrors] = useState({});
   const [imageColorPairs, setImageColorPairs] = useState([
     { image: null, color: "" },
-    { image: null, color: "" }, // Initial pairs
+    { image: null, color: "" },
   ]);
   const [selectedFiles, setSelectedFiles] = useState([null, null]);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -150,7 +152,7 @@ const AddProductForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     if (!validateForm()) return;
 
     try {
@@ -175,11 +177,14 @@ const AddProductForm = () => {
       setErrors({});
     } catch (error) {
       ErrorToast("Error adding product. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg">
+      {loading && <LoadingOverlay />}
       <h2 className="text-2xl font-bold mb-6 text-center">Add New Product</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
