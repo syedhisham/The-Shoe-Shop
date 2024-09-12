@@ -5,6 +5,7 @@ import { verifyAdmin } from "../../middleware/isAdmin.middleware.js";
 import {
   addProduct,
   getAllProducts,
+  getImageByColor,
   getImageById,
   getProductById,
   removeProduct,
@@ -17,7 +18,7 @@ const router = Router();
 router.route("/all-products").get(getAllProducts);
 router.route("/product-by-id/:productId").get(getProductById);
 router.route("/image-by-id/:imageId").get(getImageById);
-
+router.route("/image-by-color/:productId/:color").get(getImageByColor);
 //Secure Routes
 router
   .route("/add-product")

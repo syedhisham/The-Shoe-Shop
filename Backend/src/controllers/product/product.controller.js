@@ -265,7 +265,6 @@ const updateProductImagesAndColors = asyncHandler(async (req, res) => {
     );
 });
 
-
 const getAllProducts = asyncHandler(async (req, res) => {
   const {
     page = 1,
@@ -475,6 +474,27 @@ const getImageById = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, image, `Image of Id: ${imageId} is fetched`));
 });
+const getImageByColor = asyncHandler(async (req, res) => {
+  const { color, productId } = req.params;
+  if (!color || !productId) {
+    throw new ApiError(400, "Enter the color to fetch the image");
+  }
+  console.log("Product Id with color is", productId, color);
+
+  const getImageByColor = await Image.find({ productId, color });
+  if (!getImageByColor || getImageByColor.length === 0) {
+    throw new ApiError(404, "No Image found for this color");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        getImageByColor,
+        "Image for the corresponding color is fetched"
+      )
+    );
+});
 
 export {
   addProduct,
@@ -484,4 +504,5 @@ export {
   getAllProducts,
   getProductById,
   getImageById,
+  getImageByColor,
 };
