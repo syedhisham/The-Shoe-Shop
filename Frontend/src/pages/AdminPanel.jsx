@@ -7,6 +7,7 @@ import UserList from "../components/UserList";
 import UserDeleteList from "../components/UserDeleteList";
 import MostActiveUsers from "../components/MostActiveUsers";
 import ManageProducts from "./ManageProducts";
+import AllProducts from "../components/AllProducts";
 
 const sidebarItems = [
   { label: "Dashboard", icon: FaHome, component: <div>Dashboard</div> },
@@ -19,7 +20,7 @@ const sidebarItems = [
 const productManagementItems = [
   { label: "Add Product", component: <AddProductForm /> },
   { label: "Manage Products", component: <ManageProducts /> },
-  { label: "All Products", component: <div>All Products Component</div> },
+  { label: "All Products", component: <AllProducts /> },
 ];
 
 const userManagementItems = [

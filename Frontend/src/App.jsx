@@ -12,6 +12,7 @@ import MostActiveUsers from "./components/MostActiveUsers";
 import ManageProducts from "./pages/ManageProducts";
 import ProductUpdateForm from "./pages/ProductUpdateForm";
 import ProductUpdateImage from "./pages/ProductUpdateImage";
+import AllProducts from "./components/AllProducts";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/manageProducts" element={<ManageProducts />} />
         <Route path="/updateProductDetails" element={<ProductUpdateForm />} />
         <Route path="/updateProductImages" element={<ProductUpdateImage />} />
+        <Route path="/allProducts" element={<AllProducts />} />
         <Route path="/allUsers" element={<UserList />} />
         <Route path="/removeUser" element={<UserDeleteList />} />
         <Route path="/mostActiveUsers" element={<MostActiveUsers />} />

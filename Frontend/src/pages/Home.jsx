@@ -1,6 +1,7 @@
 import React from "react";
 import { CarouselCustom } from "../components/CarouselCustom";
 import Header from "../components/Header";
+import AllProducts from "../components/AllProducts";
 
 const Home = () => {
   return (
@@ -172,6 +173,9 @@ const Home = () => {
 </div>
 <div className="">
       <h1 className="text-center text-3xl mt-5 mb-3">Best Sellers</h1>
+      <div className="h-[60vh] bg-red-50">
+        <AllProducts/>
+      </div>
       </div>
     </div>
   );
