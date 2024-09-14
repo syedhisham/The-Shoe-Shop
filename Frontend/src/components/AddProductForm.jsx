@@ -393,7 +393,7 @@ const AddProductForm = () => {
           <button
             type="button"
             onClick={handleAddImageColorPair}
-            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+            className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-md transition-colors"
           >
             Add Another Image
           </button>
@@ -402,7 +402,7 @@ const AddProductForm = () => {
         <div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
+            className="w-full bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-md transition-colors"
           >
             Add Product
           </button>

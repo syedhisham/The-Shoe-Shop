@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
@@ -169,7 +168,7 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
                     ) : (
                       <>
                         <td className="py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">
-                        {`${user.firstName} ${user.lastName}`}
+                          {`${user.firstName} ${user.lastName}`}
                         </td>
                         <td className="py-2 md:py-3 px-2 md:px-4 text-sm md:text-base">
                           {user.email}
@@ -187,7 +186,7 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
 
           <div className="flex flex-col md:flex-row justify-between items-center mt-4 space-y-2 md:space-y-0">
             <Button
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:blue-red-600 w-full md:w-auto"
+              className="bg-black hover:bg-gray-700 text-white px-4 py-2 rounded  w-full md:w-auto"
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
             >
@@ -197,7 +196,7 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
               Page {page} of {totalPages}
             </span>
             <Button
-              className="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 w-full md:w-auto"
+              className="bg-black hover:bg-gray-700 text-white px-4 py-2 rounded w-full md:w-auto"
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}
             >

@@ -98,7 +98,7 @@ const AdminPanel = () => {
         } transition-transform duration-300 ease-in-out md:relative md:w-64 md:translate-x-0 lg:w-72 xl:w-80`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex-shrink-0 px-6 py-4 bg-blue-900 text-white relative">
+          <div className="flex-shrink-0 px-6 py-4 bg-black text-white relative">
             <h1 className="text-xl font-bold">Admin Panel</h1>
             <button
               className="md:hidden absolute top-4 right-4 p-2 text-white"
@@ -111,15 +111,15 @@ const AdminPanel = () => {
               )}
             </button>
           </div>
-          <nav className="flex-1 px-2 py-4 overflow-y-auto scrollbar-hidden scroll-smooth bg-blue-700 ">
+          <nav className="flex-1 px-2 py-4 overflow-y-auto scrollbar-hidden scroll-smooth bg-gray-800 ">
             <ul className="space-y-2">
               {sidebarItems.map(({ label, icon: Icon, component }, index) => (
                 <li key={index} className="relative group">
                   {label === "Product Management" ? (
                     <>
                       <button
-                        className={`flex items-center w-full px-4 py-2 text-left text-white rounded-md transition duration-300 ease-in-out transform hover:scale-105 text-sm md:text-base lg:text-lg ${
-                          isProductDropdownOpen ? "bg-blue-900" : ""
+                        className={`flex items-center w-full px-4 py-2 text-left text-white hover:bg-gray-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 text-sm md:text-base lg:text-lg ${
+                          isProductDropdownOpen ? "bg-gray-700" : ""
                         }`}
                         onClick={() =>
                           setIsProductDropdownOpen(!isProductDropdownOpen)
@@ -138,7 +138,7 @@ const AdminPanel = () => {
                         {productManagementItems.map((item, subIndex) => (
                           <li key={subIndex}>
                             <button
-                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-blue-600"
+                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-gray-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-gray-900"
                               onClick={() =>
                                 handleDropdownItemClick(item.component)
                               }
@@ -161,7 +161,7 @@ const AdminPanel = () => {
                     <>
                       <button
                         className={`flex items-center w-full px-4 py-2 text-left text-white rounded-md transition duration-300 ease-in-out transform hover:scale-105 text-sm md:text-base lg:text-lg   ${
-                          isUserDropdownOpen ? "bg-blue-900" : ""
+                          isUserDropdownOpen ? "bg-gray-700" : ""
                         }`}
                         onClick={() =>
                           setIsUserDropdownOpen(!isUserDropdownOpen)
@@ -180,7 +180,7 @@ const AdminPanel = () => {
                         {userManagementItems.map((item, subIndex) => (
                           <li key={subIndex}>
                             <button
-                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-blue-600"
+                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-gray-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-gray-900"
                               onClick={() =>
                                 handleDropdownItemClick(item.component)
                               }
@@ -195,7 +195,7 @@ const AdminPanel = () => {
                     <>
                       <button
                         className={`flex items-center w-full px-4 py-2 text-left text-white rounded-md transition duration-300 ease-in-out transform hover:scale-105 text-sm md:text-base lg:text-lg   ${
-                          isOrderDropdownOpen ? "bg-blue-900" : ""
+                          isOrderDropdownOpen ? "bg-gray-700" : ""
                         }`}
                         onClick={() =>
                           setIsOrderDropdownOpen(!isOrderDropdownOpen)
@@ -207,14 +207,14 @@ const AdminPanel = () => {
                       <ul
                         className={`ml-8 mt-2 space-y-2 transition-all duration-300 ease-in-out ${
                           isOrderDropdownOpen
-                            ? "max-h-40 opacity-100 mb-5"
+                            ? "max-h-40 opacity-100 mb-8"
                             : "max-h-0 opacity-0 overflow-hidden"
                         }`}
                       >
                         {orderManagementItems.map((item, subIndex) => (
                           <li key={subIndex}>
                             <button
-                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-blue-600"
+                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-gray-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-gray-900"
                               onClick={() =>
                                 handleDropdownItemClick(item.component)
                               }
@@ -229,7 +229,7 @@ const AdminPanel = () => {
                     <>
                       <button
                         className={`flex items-center w-full px-4 py-2 text-left text-white rounded-md transition duration-300 ease-in-out transform hover:scale-105 text-sm md:text-base lg:text-lg   ${
-                          isSettingsDropdownOpen ? "bg-blue-900" : ""
+                          isSettingsDropdownOpen ? "bg-gray-700" : ""
                         }`}
                         onClick={() =>
                           setIsSettingsDropdownOpen(!isSettingsDropdownOpen)
@@ -248,7 +248,7 @@ const AdminPanel = () => {
                         {settingsItems.map((item, subIndex) => (
                           <li key={subIndex}>
                             <button
-                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-blue-600"
+                              className="flex items-center w-full px-4 py-2 text-left text-white hover:bg-gray-600 rounded-md transition duration-300 ease-in-out transform hover:scale-105 bg-gray-900"
                               onClick={() =>
                                 handleDropdownItemClick(item.component)
                               }
@@ -261,8 +261,8 @@ const AdminPanel = () => {
                     </>
                   ) : (
                     <button
-                      className={`flex items-center w-full px-4 py-2 text-left text-white hover:bg-blue-800 rounded-md transition duration-300 ease-in-out transform hover:scale-105 ${
-                        activeComponent === component ? "bg-blue-900" : ""
+                      className={`flex items-center w-full px-4 py-2 text-left text-white hover:bg-gray-800 rounded-md transition duration-300 ease-in-out transform hover:scale-105 ${
+                        activeComponent === component ? "bg-gray-900" : ""
                       }`}
                       onClick={() => setActiveComponent(component)}
                     >

@@ -154,7 +154,7 @@ const Header = () => {
 
   return (
     <div>
-      <h1 className="flex bg-blue-800 text-white h-8 justify-center items-center">
+      <h1 className="flex bg-black text-white h-8 justify-center items-center">
         Free Delivery on order Rs.3000/-or above
       </h1>
       <Navbar
