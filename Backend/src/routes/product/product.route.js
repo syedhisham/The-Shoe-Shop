@@ -4,6 +4,7 @@ import { upload } from "../../middleware/multer.middleware.js";
 import { verifyAdmin } from "../../middleware/isAdmin.middleware.js";
 import {
   addProduct,
+  getAllCategories,
   getAllProducts,
   getAllTheImagesByColor,
   getColorsWithImages,
@@ -23,6 +24,7 @@ router.route("/image-by-id/:imageId").get(getImageById);
 router.route("/image-by-color/:productId/:color").get(getImageByColor);
 router.route("/colors-with-images/:productId").get(getColorsWithImages);
 router.route("/product/:productId").get(getAllTheImagesByColor);
+router.route("/categories").get(getAllCategories);
 //Secure Routes
 router
   .route("/add-product")
