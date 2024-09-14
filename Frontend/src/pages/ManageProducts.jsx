@@ -8,8 +8,14 @@ import axios from "axios";
 import LoadingOverlay from "../components/LoadingOverlay";
 import ProductUpdateForm from "./ProductUpdateForm";
 import ProductUpdateImage from "./ProductUpdateImage";
+import DetailedProduct from "../components/DetailedProduct";
+import { useNavigate } from "react-router-dom";
 
-const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
+const ManageProducts = ({
+  renderSmallCard = false,
+  allProductProp,
+  detailedProductCard = true,
+}) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -23,6 +29,11 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [selectedProductIdForImage, setSelectedProductIdForImage] =
     useState(null);
+  const [
+    selectProductIdForDetailedProduct,
+    setSelectProductIdForDetailedProduct,
+  ] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProducts();
@@ -141,6 +152,8 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
       const response = await axios.get(
         `/api/products/image-by-color/${productId}/${color}`
       );
+      console.log("It is rspoonse,data", response.data);
+
       return response.data;
     } catch (error) {
       console.error("Error fetching image by color:", error);
@@ -175,6 +188,10 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
       setCurrentPage(currentPage + 1);
     }
   };
+  const handleDetailedProduct = (productId, color) => {
+    setSelectProductIdForDetailedProduct(productId);
+    navigate("/detailedProduct", { state: { productId, color } }); // Pass productId and color through state
+  };
 
   return (
     <div className="container mx-auto px-4">
@@ -192,48 +209,57 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
           onClose={handleClosrUpdateClick}
         />
       )}
-
-      <div className="my-4">
-        <input
-          type="text"
-          placeholder="Search by product name"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          className="border border-gray-300 rounded p-2 w-full"
+      {selectProductIdForDetailedProduct && (
+        <DetailedProduct
+          productId={selectProductIdForDetailedProduct}
+          onGetProductId={handleDetailedProduct}
         />
-      </div>
+      )}
+      {detailedProductCard && (
+        <>
+          <div className="my-4">
+            <input
+              type="text"
+              placeholder="Search by product name"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="border border-gray-300 rounded p-2 w-full"
+            />
+          </div>
 
-      <div className="my-4 flex flex-wrap gap-4">
-        <button
-          onClick={() => handleCategoryParentChange("")}
-          className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${selectedCategoryParent === "" ? "bg-blue-700" : ""}`}
-        >
-          All Parent Categories
-        </button>
-        {categoryParents.map((parent) => (
-          <button
-            key={parent}
-            onClick={() => handleCategoryParentChange(parent)}
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${selectedCategoryParent === parent ? "bg-blue-700" : ""}`}
-          >
-            {parent}
-          </button>
-        ))}
-      </div>
-      <div className="my-4">
-        <select
-          value={selectedCategory}
-          onChange={handleCategoryChange}
-          className="border border-gray-300 rounded p-2"
-        >
-          <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-      </div>
+          <div className="my-4 flex flex-wrap gap-4">
+            <button
+              onClick={() => handleCategoryParentChange("")}
+              className={`bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${selectedCategoryParent === "" ? "bg-black" : ""}`}
+            >
+              All Parent Categories
+            </button>
+            {categoryParents.map((parent) => (
+              <button
+                key={parent}
+                onClick={() => handleCategoryParentChange(parent)}
+                className={`bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${selectedCategoryParent === parent ? "bg-black" : ""}`}
+              >
+                {parent}
+              </button>
+            ))}
+          </div>
+          <div className="my-4">
+            <select
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              className="border border-gray-300 rounded p-2"
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
 
       {renderSmallCard ? (
         ""
@@ -250,6 +276,7 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
                 smallCard={true}
                 productDetails={allProductProp}
                 onFetchImageByColor={handleFetchImageByColor}
+                onGetProductId={handleDetailedProduct}
               />
             ))
           ) : (
@@ -261,7 +288,7 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
       <div className="flex justify-center items-center mt-8">
         <button
           onClick={handlePreviousPage}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           disabled={currentPage === 1}
         >
           Previous
@@ -271,7 +298,7 @@ const ManageProducts = ({ renderSmallCard = false, allProductProp }) => {
         </p>
         <button
           onClick={handleNextPage}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
           disabled={currentPage === totalPages}
         >
           Next

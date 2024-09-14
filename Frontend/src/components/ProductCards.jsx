@@ -8,6 +8,7 @@ const ProductCards = ({
   onUpdate,
   onUpdateImage,
   onFetchImageByColor,
+  onGetProductId,
   smallCard = false,
   productDetails = false,
 }) => {
@@ -46,12 +47,12 @@ const ProductCards = ({
           setDisplayedImages(response.data.map((img) => img.imageUrl));
           setCurrentImageIndex(0);
         } else {
-          setDisplayedImages(["/default-image.jpg"]); // Fallback image
+          setDisplayedImages(["/default-image.jpg"]); 
           setCurrentImageIndex(0);
         }
       } catch (error) {
         console.error("Error fetching image by color:", error);
-        setDisplayedImages(["/default-image.jpg"]); // Fallback image
+        setDisplayedImages(["/default-image.jpg"]);
         setCurrentImageIndex(0);
       } finally {
         setFadeIn(true);
@@ -116,7 +117,7 @@ const ProductCards = ({
               </Carousel>
             </div>
           ) : (
-            <div className="max-w-sm rounded-lg shadow-lg m-4">
+            <div className="max-w-sm rounded-lg shadow-lg m-4" onClick={() => onGetProductId(product._id)}>
               <div
                 id="imageContainer"
                 className={`image-container ${fadeIn ? "fade-in" : "fade-out"}`}
@@ -150,9 +151,9 @@ const ProductCards = ({
                   ))}
               </div>
             )}
-            <p className="text-sm mb-2 flex items-center">
+            <p className="text-sm mb-2 flex items-center" onClick={() => onGetProductId(product._id)}>
               {product.name}
-              <span className="inline-block mx-2 w-5 border-t-2 border-gray-400"></span>
+              <span className="inline-block mx-2 w-5 border-t-2 border-gray-400" onClick={() => onGetProductId(product._id)}></span>
               {product.price}
             </p>
 

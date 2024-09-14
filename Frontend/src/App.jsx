@@ -13,6 +13,7 @@ import ManageProducts from "./pages/ManageProducts";
 import ProductUpdateForm from "./pages/ProductUpdateForm";
 import ProductUpdateImage from "./pages/ProductUpdateImage";
 import AllProducts from "./components/AllProducts";
+import DetailedProduct from "./components/DetailedProduct";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/updateProductDetails" element={<ProductUpdateForm />} />
         <Route path="/updateProductImages" element={<ProductUpdateImage />} />
         <Route path="/allProducts" element={<AllProducts />} />
+        <Route path="/detailedProduct" element={<DetailedProduct />} />
         <Route path="/allUsers" element={<UserList />} />
         <Route path="/removeUser" element={<UserDeleteList />} />
         <Route path="/mostActiveUsers" element={<MostActiveUsers />} />
