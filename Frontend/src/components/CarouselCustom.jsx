@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 export function CarouselCustom() {
   const images = [
@@ -18,14 +18,14 @@ export function CarouselCustom() {
   }, [images.length]);
 
   return (
-    <div className="relative w-[80vw] h-[79vh] overflow-hidden m-auto">
+    <div className="relative w-full md:w-[80vw] h-[50vh] md:h-[79vh] overflow-hidden m-auto">
       {images.map((src, index) => (
         <img
           key={index}
           src={src}
           alt={`Slide ${index + 1}`}
           className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
-            activeIndex === index ? 'opacity-100 z-20' : 'opacity-0 z-10'
+            activeIndex === index ? "opacity-100 z-20" : "opacity-0 z-10"
           }`}
         />
       ))}
