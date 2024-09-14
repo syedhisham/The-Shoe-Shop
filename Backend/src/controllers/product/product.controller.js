@@ -479,7 +479,6 @@ const getImageByColor = asyncHandler(async (req, res) => {
   if (!color || !productId) {
     throw new ApiError(400, "Enter the color to fetch the image");
   }
-  console.log("Product Id with color is", productId, color);
 
   const getImageByColor = await Image.find({ productId, color });
   if (!getImageByColor || getImageByColor.length === 0) {
@@ -495,6 +494,56 @@ const getImageByColor = asyncHandler(async (req, res) => {
       )
     );
 });
+const getColorsWithImages = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  if (!productId) {
+    throw new ApiError(400, "Product Id is required to proceed");
+  }
+  const productImages = await Image.find({ productId })
+    .sort({ createdAt: 1 })
+    .exec();
+
+  const colorMap = productImages.reduce((acc, image) => {
+    if (!acc[image.color]) {
+      acc[image.color] = image;
+    }
+    return acc;
+  }, {});
+
+  const colorsWithImages = Object.keys(colorMap).map((color) => ({
+    color,
+    imageUrl: colorMap[color].imageUrl,
+  }));
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { data: colorsWithImages },
+        "Colors with their first images fetched successfully"
+      )
+    );
+});
+const getAllTheImagesByColor = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  if (!productId) {
+    throw new ApiError(400, "Product id is required to proceed");
+  }
+  const { color } = req.query;
+  if (!color) {
+    throw new ApiError(400, "Color is required to proceed");
+  }
+  const imagesByColor = await Image.find({ productId, color });
+  if (!imagesByColor) {
+    throw new ApiError(404, "No images found for this color");
+  }
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, imagesByColor, "All the images by color are fetched")
+    );
+});
 
 export {
   addProduct,
@@ -505,4 +554,6 @@ export {
   getProductById,
   getImageById,
   getImageByColor,
+  getColorsWithImages,
+  getAllTheImagesByColor,
 };

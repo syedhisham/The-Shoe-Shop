@@ -5,6 +5,8 @@ import { verifyAdmin } from "../../middleware/isAdmin.middleware.js";
 import {
   addProduct,
   getAllProducts,
+  getAllTheImagesByColor,
+  getColorsWithImages,
   getImageByColor,
   getImageById,
   getProductById,
@@ -19,6 +21,8 @@ router.route("/all-products").get(getAllProducts);
 router.route("/product-by-id/:productId").get(getProductById);
 router.route("/image-by-id/:imageId").get(getImageById);
 router.route("/image-by-color/:productId/:color").get(getImageByColor);
+router.route("/colors-with-images/:productId").get(getColorsWithImages);
+router.route("/product/:productId").get(getAllTheImagesByColor);
 //Secure Routes
 router
   .route("/add-product")
