@@ -3,6 +3,7 @@ import { ApiResponse } from "../../utils/ApiResponse.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Product } from "../../models/product/product.model.js";
 import { Image } from "../../models/product/image.model.js";
+import { Category } from "../../models/product/category.model.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
@@ -70,7 +71,6 @@ const addProduct = asyncHandler(async (req, res) => {
       )
     );
 });
-
 const removeProduct = asyncHandler(async (req, res) => {
   const { productId } = req.params;
   if (!productId) {
@@ -105,7 +105,6 @@ const removeProduct = asyncHandler(async (req, res) => {
       new ApiResponse(200, productToDelete, "Product deleted successfully")
     );
 });
-
 const updateProductDetails = asyncHandler(async (req, res) => {
   const { productId } = req.params;
 
@@ -178,7 +177,6 @@ const updateProductDetails = asyncHandler(async (req, res) => {
     );
   }
 });
-
 const updateProductImagesAndColors = asyncHandler(async (req, res) => {
   const colors = req.body.colors || [];
   if (!colors || colors.length === 0) {
@@ -264,7 +262,6 @@ const updateProductImagesAndColors = asyncHandler(async (req, res) => {
       )
     );
 });
-
 const getAllProducts = asyncHandler(async (req, res) => {
   const {
     page = 1,
@@ -382,7 +379,6 @@ const getAllProducts = asyncHandler(async (req, res) => {
     )
   );
 });
-
 const getProductById = asyncHandler(async (req, res) => {
   const { productId } = req.params;
   if (!productId) {
@@ -544,6 +540,42 @@ const getAllTheImagesByColor = asyncHandler(async (req, res) => {
       new ApiResponse(200, imagesByColor, "All the images by color are fetched")
     );
 });
+const getAllCategories = asyncHandler(async (req, res) => {
+  const pipeline = [
+    {
+      $match: {
+        parent: null,
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "_id",
+        foreignField: "parent",
+        as: "subcategories",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        description: 1,
+        subcategories: {
+          _id: 1,
+          name: 1,
+          description: 1,
+        },
+      },
+    },
+  ];
+  const categories = await Category.aggregate(pipeline);
+  if (!categories || categories.length === 0) {
+    throw new ApiError(500, "Something went wrong to fetch the categories");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, categories, "All categories are fethced"));
+});
 
 export {
   addProduct,
@@ -556,4 +588,5 @@ export {
   getImageByColor,
   getColorsWithImages,
   getAllTheImagesByColor,
+  getAllCategories,
 };
