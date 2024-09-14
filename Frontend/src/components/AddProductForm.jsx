@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Input, Textarea } from "@material-tailwind/react";
 import SuccessToast from "../components/SuccessToast";
@@ -8,12 +8,15 @@ import "react-toastify/dist/ReactToastify.css";
 import LoadingOverlay from "./LoadingOverlay";
 
 const API_URL = "/api/products";
+const CATEGORIES_API_URL = "/api/products/categories";
+
 const AddProductForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
     category: "",
+    subcategory: "",
     stock: "",
     sizes: [],
     availableColors: [],
@@ -25,6 +28,32 @@ const AddProductForm = () => {
   ]);
   const [selectedFiles, setSelectedFiles] = useState([null, null]);
   const [loading, setLoading] = useState(false);
+
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(CATEGORIES_API_URL);
+        setCategories(response.data.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        ErrorToast("Error fetching categories. Please try again.");
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const parentCategory = categories.find(
+      (cat) => cat._id === formData.category
+    );
+    if (parentCategory) {
+      setSubcategories(parentCategory.subcategories || []);
+    }
+  }, [formData.category, categories]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -93,6 +122,8 @@ const AddProductForm = () => {
 
     if (!formData.category.trim()) newErrors.category = "Category is required.";
 
+    if (!formData.subcategory.trim()) newErrors.subcategory = "Subcategory is required.";
+
     if (!formData.stock || isNaN(formData.stock) || formData.stock < 0)
       newErrors.stock = "Stock must be a non-negative number.";
 
@@ -117,6 +148,7 @@ const AddProductForm = () => {
       formDataToSend.append("description", productData.description);
       formDataToSend.append("price", productData.price);
       formDataToSend.append("category", productData.category);
+      formDataToSend.append("subcategory", productData.subcategory);
       formDataToSend.append("stock", productData.stock);
       formDataToSend.append("sizes", JSON.stringify(productData.sizes)); // Send sizes
       formDataToSend.append(
@@ -164,6 +196,7 @@ const AddProductForm = () => {
         description: "",
         price: "",
         category: "",
+        subcategory: "",
         stock: "",
         sizes: [],
         availableColors: [],
@@ -244,22 +277,44 @@ const AddProductForm = () => {
         </div>
 
         <div>
-          <Input
-            type="text"
+          <select
             name="category"
             id="category"
-            className="w-full px-4 py-2"
+            className="w-full px-4 py-2 border rounded-md"
             onChange={handleChange}
-            variant="outlined"
-            label="Category"
-            size="lg"
-            color="blue"
-            placeholder="Category of the product"
             value={formData.category}
             required
-          />
+          >
+            <option value="">Select a Category</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
           {errors.category && (
             <p className="text-red-500 text-sm">{errors.category}</p>
+          )}
+        </div>
+
+        <div>
+          <select
+            name="subcategory"
+            id="subcategory"
+            className="w-full px-4 py-2 border rounded-md"
+            onChange={handleChange}
+            value={formData.subcategory}
+            required
+          >
+            <option value="">Select a Subcategory</option>
+            {subcategories.map((sub) => (
+              <option key={sub._id} value={sub._id}>
+                {sub.name}
+              </option>
+            ))}
+          </select>
+          {errors.subcategory && (
+            <p className="text-red-500 text-sm">{errors.subcategory}</p>
           )}
         </div>
 
