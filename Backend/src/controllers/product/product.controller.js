@@ -499,9 +499,13 @@ const getColorsWithImages = asyncHandler(async (req, res) => {
   if (!productId) {
     throw new ApiError(400, "Product Id is required to proceed");
   }
+
   const productImages = await Image.find({ productId })
     .sort({ createdAt: 1 })
     .exec();
+  if (!productImages) {
+    throw new ApiError(404, "No Images found for this product");
+  }
 
   const colorMap = productImages.reduce((acc, image) => {
     if (!acc[image.color]) {
@@ -515,15 +519,11 @@ const getColorsWithImages = asyncHandler(async (req, res) => {
     imageUrl: colorMap[color].imageUrl,
   }));
 
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { data: colorsWithImages },
-        "Colors with their first images fetched successfully"
-      )
-    );
+  return res.status(200).json({
+    success: true,
+    data: colorsWithImages,
+    message: "Colors with their first images fetched successfully",
+  });
 });
 const getAllTheImagesByColor = asyncHandler(async (req, res) => {
   const { productId } = req.params;
