@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Carousel } from "@material-tailwind/react";
+import { Carousel, IconButton } from "@material-tailwind/react";
 import { FaEdit } from "react-icons/fa";
 
 const ProductCards = ({
@@ -47,7 +47,7 @@ const ProductCards = ({
           setDisplayedImages(response.data.map((img) => img.imageUrl));
           setCurrentImageIndex(0);
         } else {
-          setDisplayedImages(["/default-image.jpg"]); 
+          setDisplayedImages(["/default-image.jpg"]);
           setCurrentImageIndex(0);
         }
       } catch (error) {
@@ -86,17 +86,82 @@ const ProductCards = ({
         <div className="relative max-w-sm rounded overflow-hidden shadow-lg m-4">
           {!productDetails ? (
             <div className="p-4">
-              <Carousel className="rounded-lg relative">
+              <Carousel
+                className="rounded-lg relative"
+                loop
+                autoplay
+                navigation={({ setActiveIndex, activeIndex, length }) => (
+                  <div className="absolute bottom-4 left-2/4 z-50 flex -translate-x-2/4 gap-2">
+                    {new Array(length).fill("").map((_, i) => (
+                      <span
+                        key={i}
+                        className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
+                          activeIndex === i ? "w-8 bg-black" : "w-4 bg-gray-600"
+                        }`}
+                        onClick={() => setActiveIndex(i)}
+                      />
+                    ))}
+                  </div>
+                )}
+                prevArrow={({ handlePrev }) => (
+                  <IconButton
+                    variant="text"
+                    color="white"
+                    size="lg"
+                    onClick={handlePrev}
+                    className="!absolute top-2/4 left-4 -translate-y-2/4"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="h-6 w-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                      />
+                    </svg>
+                  </IconButton>
+                )}
+                nextArrow={({ handleNext }) => (
+                  <IconButton
+                    variant="text"
+                    color="white"
+                    size="lg"
+                    onClick={handleNext}
+                    className="!absolute top-2/4 !right-4 -translate-y-2/4"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="h-6 w-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                      />
+                    </svg>
+                  </IconButton>
+                )}
+              >
                 {product.images.length > 0 ? (
                   product.images.map((image, index) => (
                     <div key={index} className="relative">
                       <img
                         src={image}
                         alt={`Product Image ${index + 1}`}
-                        className="h-48 w-full object-cover"
+                        className="h-80 w-full object-cover"
                       />
                       <FaEdit
-                        className="absolute bottom-4 right-4 text-white text-2xl cursor-pointer"
+                        className="absolute bottom-4 right-4 text-gray-900 text-xl cursor-pointer"
                         onClick={() => onUpdateImage(product._id)}
                       />
                     </div>
@@ -109,7 +174,7 @@ const ProductCards = ({
                       className="h-48 w-full object-cover"
                     />
                     <FaEdit
-                      className="absolute bottom-4 right-4 text-white text-2xl cursor-pointer"
+                      className="absolute bottom-4 right-4 text-white text-xl cursor-pointer"
                       onClick={() => onUpdateImage(product._id)}
                     />
                   </div>
@@ -117,7 +182,10 @@ const ProductCards = ({
               </Carousel>
             </div>
           ) : (
-            <div className="max-w-sm rounded-lg shadow-lg m-4" onClick={() => onGetProductId(product._id)}>
+            <div
+              className="max-w-sm rounded-lg shadow-lg m-4"
+              onClick={() => onGetProductId(product._id)}
+            >
               <div
                 id="imageContainer"
                 className={`image-container ${fadeIn ? "fade-in" : "fade-out"}`}
@@ -151,36 +219,53 @@ const ProductCards = ({
                   ))}
               </div>
             )}
-            <p className="text-sm mb-2 flex items-center" onClick={() => onGetProductId(product._id)}>
+            <p
+              className="text-sm mb-2 flex items-center"
+              onClick={() => onGetProductId(product._id)}
+            >
               {product.name}
-              <span className="inline-block mx-2 w-5 border-t-2 border-gray-400" onClick={() => onGetProductId(product._id)}></span>
+              <span
+                className="inline-block mx-2 w-5 border-t-2 border-gray-400"
+                onClick={() => onGetProductId(product._id)}
+              ></span>
               {product.price}
             </p>
 
             {!productDetails && (
-              <>
-                <p className="text-gray-700 text-base">
-                  Category: {product.categoryName}
-                </p>
-                <p className="text-gray-700 text-base">
-                  Category Parent Name: {product.categoryParentName}
-                </p>
-                <p className="text-gray-700 text-base">
-                  Stock: {product.stock}
-                </p>
-                <p className="text-gray-700 text-base">
-                  Sizes: {product.sizes ? product.sizes.join(", ") : "N/A"}
-                </p>
-                <p className="text-gray-700 text-base">
-                  Description: {product.description}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  Created At: {formatDate(product.createdAt)}
-                </p>
-                <p className="text-gray-600 text-sm">
-                  Updated At: {formatDate(product.updatedAt)}
-                </p>
-              </>
+              <div className="p-6 bg-white border rounded-lg">
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-700 w-36">
+                      Stock:
+                    </span>
+                    <p className="text-gray-700 text-base">{product.stock}</p>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-700 w-36">
+                      Sizes:
+                    </span>
+                    <p className="text-gray-700 text-base">
+                      {product.sizes ? product.sizes.join(", ") : "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-600 w-36">
+                      Created At:
+                    </span>
+                    <p className="text-gray-600 text-sm">
+                      {formatDate(product.createdAt)}
+                    </p>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-600 w-36">
+                      Updated At:
+                    </span>
+                    <p className="text-gray-600 text-sm">
+                      {formatDate(product.updatedAt)}
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
           {!productDetails && (

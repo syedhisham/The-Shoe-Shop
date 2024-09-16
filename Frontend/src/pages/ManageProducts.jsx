@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import ProductCards from "../components/ProductCards";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import SuccessToast from "../components/SuccessToast";
 import ErrorToast from "../components/ErrorToast";
-import axios from "axios";
 import LoadingOverlay from "../components/LoadingOverlay";
 import ProductUpdateForm from "./ProductUpdateForm";
 import ProductUpdateImage from "./ProductUpdateImage";
-import DetailedProduct from "../components/DetailedProduct";
 import { useNavigate } from "react-router-dom";
+import {
+  Button,
+  IconButton,
+  Input,
+  Select,
+  Option,
+} from "@material-tailwind/react";
+import { CiSearch } from "react-icons/ci";
 
 const ManageProducts = ({
   renderSmallCard = false,
@@ -19,20 +26,18 @@ const ManageProducts = ({
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [subcategories, setSubcategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [categoryParents, setCategoryParents] = useState([]);
-  const [selectedCategoryParent, setSelectedCategoryParent] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [selectedProductIdForImage, setSelectedProductIdForImage] =
     useState(null);
-  const [
-    selectProductIdForDetailedProduct,
-    setSelectProductIdForDetailedProduct,
-  ] = useState(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,21 +52,21 @@ const ManageProducts = ({
       );
       if (response.data && response.data.data) {
         const productDetails = response.data.data.ProductDetails || [];
-
         setProducts(productDetails);
         setFilteredProducts(productDetails);
         setTotalPages(response.data.data.TotalPages || 1);
 
-        const uniqueCategories = [
-          ...new Set(productDetails.map((product) => product.categoryName)),
-        ];
-        const uniqueCategoryParents = [
-          ...new Set(
-            productDetails.map((product) => product.categoryParentName)
-          ),
-        ];
-        setCategories(uniqueCategories);
-        setCategoryParents(uniqueCategoryParents);
+        const categoriesSet = new Set(productDetails.map((p) => p.category));
+        setCategories(["All", ...categoriesSet]);
+
+        if (selectedCategory !== "All") {
+          const subcategoriesSet = new Set(
+            productDetails
+              .filter((p) => p.category === selectedCategory)
+              .map((p) => p.subcategory)
+          );
+          setSubcategories([...subcategoriesSet]);
+        }
       } else {
         console.error("Unexpected API response format");
       }
@@ -71,69 +76,58 @@ const ManageProducts = ({
       setLoading(false);
     }
   };
-  const handleCategoryParentChange = (categoryParent) => {
-    setSelectedCategoryParent(categoryParent);
 
-    const filteredByParent =
-      categoryParent === ""
-        ? products
-        : products.filter(
-            (product) => product.categoryParentName === categoryParent
-          );
+  useEffect(() => {
+    filterProducts();
+  }, [searchTerm, selectedCategory, selectedSubcategory, products]);
 
-    setFilteredProducts(
-      selectedCategory === ""
-        ? filteredByParent
-        : filteredByParent.filter(
-            (product) => product.categoryName === selectedCategory
-          )
-    );
-  };
-
-  const handleCategoryChange = (e) => {
-    const category = e.target.value;
-    setSelectedCategory(category);
-
-    if (category === "") {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(
-        products.filter((product) => product.categoryName === category)
-      );
-    }
-  };
-
-  const handleSearchChange = (e) => {
-    const term = e.target.value;
-    setSearchTerm(term);
-    filterProducts(selectedCategoryParent, selectedCategory, term);
-  };
-
-  const filterProducts = (categoryParent, category, searchTerm) => {
+  const filterProducts = () => {
     let filtered = products;
-    if (categoryParent) {
+
+    if (selectedCategory !== "All") {
       filtered = filtered.filter(
-        (product) => product.categoryParentName === categoryParent
+        (product) => product.category === selectedCategory
       );
     }
-    if (category) {
+
+    if (selectedSubcategory) {
       filtered = filtered.filter(
-        (product) => product.categoryName === category
+        (product) => product.subcategory === selectedSubcategory
       );
     }
+
     if (searchTerm) {
       filtered = filtered.filter((product) =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
+
     setFilteredProducts(filtered);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    setSelectedSubcategory("");
+    if (category === "All") {
+      setSubcategories([]);
+    } else {
+      const subcategoriesSet = new Set(
+        products
+          .filter((p) => p.category === category)
+          .map((p) => p.subcategory)
+      );
+      setSubcategories([...subcategoriesSet]);
+    }
   };
 
   const handleProductDelete = async (productId) => {
     setLoading(true);
     try {
       await axios.delete(`/api/products/remove-product/${productId}`);
-
       setFilteredProducts(
         filteredProducts.filter((product) => product._id !== productId)
       );
@@ -145,38 +139,35 @@ const ManageProducts = ({
       setLoading(false);
     }
   };
-  const handleFetchImageByColor = async (productId, color) => {
-    console.log("It is producd Id", productId, color);
 
+  const handleFetchImageByColor = async (productId, color) => {
     try {
       const response = await axios.get(
         `/api/products/image-by-color/${productId}/${color}`
       );
-      console.log("It is rspoonse,data", response.data);
-
       return response.data;
     } catch (error) {
       console.error("Error fetching image by color:", error);
       throw error;
     }
   };
+
   const handleProductUpdate = (productId) => {
     setSelectedProductId(productId);
   };
 
   const handleCloseUpdateForm = () => {
-    setTimeout(() => {
-      setSelectedProductId(null);
-    }, 3000);
+    setSelectedProductId(null);
   };
+
   const handleUpdateClick = (productId) => {
     setSelectedProductIdForImage(productId);
   };
-  const handleClosrUpdateClick = () => {
-    setTimeout(() => {
-      setSelectedProductIdForImage(null);
-    }, 4000);
+
+  const handleCloseUpdateClick = () => {
+    setSelectedProductIdForImage(null);
   };
+
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
@@ -188,9 +179,14 @@ const ManageProducts = ({
       setCurrentPage(currentPage + 1);
     }
   };
+
   const handleDetailedProduct = (productId, color) => {
-    setSelectProductIdForDetailedProduct(productId);
-    navigate("/detailedProduct", { state: { productId, color } }); // Pass productId and color through state
+    if (!productId) return;
+    navigate("/detailedProduct", { state: { productId, color } });
+  };
+
+  const handleSearchClick = () => {
+    setIsSearchOpen(!isSearchOpen);
   };
 
   return (
@@ -206,58 +202,83 @@ const ManageProducts = ({
       {selectedProductIdForImage && (
         <ProductUpdateImage
           productId={selectedProductIdForImage}
-          onClose={handleClosrUpdateClick}
+          onClose={handleCloseUpdateClick}
         />
       )}
-      {selectProductIdForDetailedProduct && (
-        <DetailedProduct
-          productId={selectProductIdForDetailedProduct}
-          onGetProductId={handleDetailedProduct}
-        />
-      )}
+
       {detailedProductCard && (
         <>
-          <div className="my-4">
-            <input
-              type="text"
-              placeholder="Search by product name"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className="border border-gray-300 rounded p-2 w-full"
-            />
+          <div className="my-4 flex items-center">
+            <IconButton
+              className="mt-4"
+              variant="outlined"
+              onClick={handleSearchClick}
+            >
+              <CiSearch
+                className="cursor-pointer text-gray-600 transition-transform duration-300 hover:scale-110"
+                style={{ color: "black", fontSize: "2.5em" }}
+                size={24}
+              />
+            </IconButton>
+
+            <div
+              className={`transition-all duration-500 ease-in-out ml-2 pt-5 overflow-hidden ${
+                isSearchOpen ? "w-full" : "w-0"
+              }`}
+            >
+              <Input
+                variant="standard"
+                type="text"
+                label="Type to search"
+                placeholder="Search by product name"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className={`pl-4 pr-4 py-2 w-full shadow-sm transition duration-300 transform ${
+                  isSearchOpen ? "scale-100" : "scale-0"
+                }`}
+              />
+            </div>
           </div>
 
-          <div className="my-4 flex flex-wrap gap-4">
-            <button
-              onClick={() => handleCategoryParentChange("")}
-              className={`bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${selectedCategoryParent === "" ? "bg-black" : ""}`}
+          <div className="my-4 flex gap-2">
+            <Button
+              variant="outlined"
+              onClick={() => handleCategoryChange("All")}
+              className={selectedCategory === "All" ? "bg-gray-300" : ""}
             >
-              All Parent Categories
-            </button>
-            {categoryParents.map((parent) => (
-              <button
-                key={parent}
-                onClick={() => handleCategoryParentChange(parent)}
-                className={`bg-black hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ${selectedCategoryParent === parent ? "bg-black" : ""}`}
-              >
-                {parent}
-              </button>
-            ))}
-          </div>
-          <div className="my-4">
-            <select
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              className="border border-gray-300 rounded p-2"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
+              All Categories
+            </Button>
+            {categories
+              .filter((category) => category !== "All")
+              .map((category) => (
+                <Button
+                  key={category}
+                  variant="outlined"
+                  onClick={() => handleCategoryChange(category)}
+                  className={selectedCategory === category ? "bg-gray-300" : ""}
+                >
                   {category}
-                </option>
+                </Button>
               ))}
-            </select>
           </div>
+
+          {subcategories.length > 0 && (
+            <div className="my-4">
+              <Select
+                variant="outlined"
+                label="Select Subcategory"
+                value={selectedSubcategory}
+                onChange={(value) => setSelectedSubcategory(value)}
+              >
+                <Option value="">All Subcategories</Option>
+                {subcategories.map((subcategory) => (
+                  <Option key={subcategory} value={subcategory}>
+                    {subcategory}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+          )}
         </>
       )}
 

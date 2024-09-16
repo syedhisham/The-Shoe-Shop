@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Input, Textarea } from "@material-tailwind/react";
+import {
+  Input,
+  Textarea,
+  Select,
+  Option,
+  Button,
+} from "@material-tailwind/react";
 import SuccessToast from "../components/SuccessToast";
 import ErrorToast from "../components/ErrorToast";
 import { ToastContainer } from "react-toastify";
@@ -8,15 +14,14 @@ import "react-toastify/dist/ReactToastify.css";
 import LoadingOverlay from "./LoadingOverlay";
 
 const API_URL = "/api/products";
-const CATEGORIES_API_URL = "/api/products/categories";
 
 const AddProductForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    price: "",
     category: "",
     subcategory: "",
+    price: "",
     stock: "",
     sizes: [],
     availableColors: [],
@@ -28,32 +33,6 @@ const AddProductForm = () => {
   ]);
   const [selectedFiles, setSelectedFiles] = useState([null, null]);
   const [loading, setLoading] = useState(false);
-
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(CATEGORIES_API_URL);
-        setCategories(response.data.data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        ErrorToast("Error fetching categories. Please try again.");
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const parentCategory = categories.find(
-      (cat) => cat._id === formData.category
-    );
-    if (parentCategory) {
-      setSubcategories(parentCategory.subcategories || []);
-    }
-  }, [formData.category, categories]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,6 +53,13 @@ const AddProductForm = () => {
     setFormData((prevState) => ({
       ...prevState,
       availableColors: e.target.value.split(",").map((color) => color.trim()),
+    }));
+  };
+  const handleCategorySelect = (category) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      category,
+      subcategory: "",
     }));
   };
 
@@ -116,13 +102,12 @@ const AddProductForm = () => {
     let newErrors = {};
 
     if (!formData.name.trim()) newErrors.name = "Product name is required.";
+    if (!formData.category.trim()) newErrors.category = "Category is required.";
+    if (!formData.subcategory.trim())
+      newErrors.subcategory = "Sub-Category is required.";
 
     if (!formData.price || isNaN(formData.price) || formData.price <= 0)
       newErrors.price = "Price must be a positive number.";
-
-    if (!formData.category.trim()) newErrors.category = "Category is required.";
-
-    if (!formData.subcategory.trim()) newErrors.subcategory = "Subcategory is required.";
 
     if (!formData.stock || isNaN(formData.stock) || formData.stock < 0)
       newErrors.stock = "Stock must be a non-negative number.";
@@ -146,9 +131,9 @@ const AddProductForm = () => {
 
       formDataToSend.append("name", productData.name);
       formDataToSend.append("description", productData.description);
-      formDataToSend.append("price", productData.price);
       formDataToSend.append("category", productData.category);
       formDataToSend.append("subcategory", productData.subcategory);
+      formDataToSend.append("price", productData.price);
       formDataToSend.append("stock", productData.stock);
       formDataToSend.append("sizes", JSON.stringify(productData.sizes)); // Send sizes
       formDataToSend.append(
@@ -194,9 +179,9 @@ const AddProductForm = () => {
       setFormData({
         name: "",
         description: "",
-        price: "",
         category: "",
         subcategory: "",
+        price: "",
         stock: "",
         sizes: [],
         availableColors: [],
@@ -214,6 +199,10 @@ const AddProductForm = () => {
       setLoading(false);
     }
   };
+  const availableSubcategories =
+    formData.category === "Ladies Footwear"
+      ? ["Sandals", "Slippers", "Shoes", "Sneakers", "Pumps"]
+      : ["Sandals", "Slippers", "Shoes", "Sneakers"];
 
   return (
     <div className="max-w-2xl mx-auto p-8 bg-white shadow-lg rounded-lg">
@@ -230,7 +219,6 @@ const AddProductForm = () => {
             variant="outlined"
             label="Product Name"
             size="lg"
-            color="blue"
             placeholder="Name of the product"
             value={formData.name}
             required
@@ -248,11 +236,63 @@ const AddProductForm = () => {
             variant="outlined"
             label="Description"
             size="lg"
-            color="blue"
             value={formData.description}
           />
           {errors.description && (
             <p className="text-red-500 text-sm">{errors.description}</p>
+          )}
+        </div>
+
+        {/* Category Selection as Buttons */}
+        <div className="flex space-x-4 mb-4">
+          <Button
+            type="Button"
+            size="lg"
+            onClick={() => handleCategorySelect("Gents Footwear")}
+            className={`px-4 py-2 rounded-md text-white ${
+              formData.category === "Gents Footwear"
+                ? "bg-gray-800"
+                : "bg-black"
+            }`}
+          >
+            Gents Footwear
+          </Button>
+          <Button
+            type="Button"
+            size="lg"
+            onClick={() => handleCategorySelect("Ladies Footwear")}
+            className={`px-4 py-2 rounded-md text-white ${
+              formData.category === "Ladies Footwear"
+                ? "bg-gray-800"
+                : "bg-black"
+            }`}
+          >
+            Ladies Footwear
+          </Button>
+        </div>
+        {errors.category && (
+          <p className="text-red-500 text-sm">{errors.category}</p>
+        )}
+
+        <div>
+          <Select
+            label="Select Subcategory"
+            name="subcategory"
+            value={formData.subcategory}
+            onChange={(e) =>
+              handleChange({ target: { name: "subcategory", value: e } })
+            }
+            variant="outlined"
+            size="lg"
+          >
+            {availableSubcategories.map((subcategory) => (
+              <Option key={subcategory} value={subcategory}>
+                {subcategory}
+              </Option>
+            ))}
+          </Select>
+          {errors.subcategory && (
+            <p className="text-red-500 text-sm">{errors.subcategory}</p>
           )}
         </div>
 
@@ -266,55 +306,13 @@ const AddProductForm = () => {
             variant="outlined"
             label="Price"
             size="lg"
-            color="blue"
             placeholder="Price of the product"
             value={formData.price}
+            min="0"
             required
           />
           {errors.price && (
             <p className="text-red-500 text-sm">{errors.price}</p>
-          )}
-        </div>
-
-        <div>
-          <select
-            name="category"
-            id="category"
-            className="w-full px-4 py-2 border rounded-md"
-            onChange={handleChange}
-            value={formData.category}
-            required
-          >
-            <option value="">Select a Category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          {errors.category && (
-            <p className="text-red-500 text-sm">{errors.category}</p>
-          )}
-        </div>
-
-        <div>
-          <select
-            name="subcategory"
-            id="subcategory"
-            className="w-full px-4 py-2 border rounded-md"
-            onChange={handleChange}
-            value={formData.subcategory}
-            required
-          >
-            <option value="">Select a Subcategory</option>
-            {subcategories.map((sub) => (
-              <option key={sub._id} value={sub._id}>
-                {sub.name}
-              </option>
-            ))}
-          </select>
-          {errors.subcategory && (
-            <p className="text-red-500 text-sm">{errors.subcategory}</p>
           )}
         </div>
 
@@ -328,9 +326,9 @@ const AddProductForm = () => {
             variant="outlined"
             label="Stock"
             size="lg"
-            color="blue"
             placeholder="Stock of the product"
             value={formData.stock}
+            min="0"
             required
           />
           {errors.stock && (
@@ -348,7 +346,6 @@ const AddProductForm = () => {
             variant="outlined"
             label="Sizes (Comma Separated)"
             size="lg"
-            color="blue"
             placeholder="e.g. 39, 42, 45"
             value={formData.sizes.join(", ")}
             required
@@ -368,7 +365,6 @@ const AddProductForm = () => {
             variant="outlined"
             label="Available Colors (Comma Separated)"
             size="lg"
-            color="blue"
             placeholder="e.g., Red, Blue, Green"
             value={formData.availableColors.join(", ")}
             required
@@ -395,8 +391,8 @@ const AddProductForm = () => {
                     alt={`Image Preview ${index + 1}`}
                     className="w-80 h-60 object-cover rounded-md border mb-5"
                   />
-                  <button
-                    type="button"
+                  <Button
+                    type="Button"
                     className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-lg"
                     onClick={() => handleRemoveImage(index)}
                   >
@@ -414,7 +410,7 @@ const AddProductForm = () => {
                         d="M6 18L18 6M6 6l12 12"
                       ></path>
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -434,7 +430,6 @@ const AddProductForm = () => {
                 variant="outlined"
                 label="Color"
                 size="lg"
-                color="blue"
                 placeholder="Color"
                 required
               />
@@ -445,22 +440,21 @@ const AddProductForm = () => {
               )}
             </div>
           ))}
-          <button
-            type="button"
+          <Button
+            type="Button"
             onClick={handleAddImageColorPair}
             className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-md transition-colors"
           >
             Add Another Image
-          </button>
+          </Button>
         </div>
-
         <div>
-          <button
+          <Button
             type="submit"
             className="w-full bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-md transition-colors"
           >
             Add Product
-          </button>
+          </Button>
         </div>
       </form>
       <ToastContainer />

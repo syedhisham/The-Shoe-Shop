@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 import ManageProducts from "../pages/ManageProducts";
 import ReviewsOnProduct from "./ReviewsOnProduct";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
+import LoadingOverlay from "./LoadingOverlay";
 
 const DetailedProduct = () => {
   const location = useLocation();
@@ -16,11 +17,13 @@ const DetailedProduct = () => {
   const [activeImage, setActiveImage] = useState("");
   const [colorImages, setColorImages] = useState([]);
   const [colorsWithImages, setColorsWithImages] = useState([]);
-  const [textColor, setTextColor] = useState("");
-  const [text, setText] = useState("");
-  const [circleColor, setCircleColor] = useState("");
   const [selectedSize, setSelectedSize] = useState(null);
   const [isFilled, setIsFilled] = useState(false);
+  const [inventoryStatus, setInventoryStatus] = useState({
+    textColor: "",
+    circleColor: "",
+    text: "",
+  });
 
   useEffect(() => {
     const fetchProductById = async () => {
@@ -64,19 +67,27 @@ const DetailedProduct = () => {
 
   useEffect(() => {
     if (product) {
+      let status = { textColor: "", circleColor: "", text: "" };
       if (product.stock < 15) {
-        setTextColor("text-red-500");
-        setCircleColor("bg-red-500");
-        setText("Limited stock available");
+        status = {
+          textColor: "text-red-500",
+          circleColor: "bg-red-500",
+          text: "Limited stock available",
+        };
       } else if (product.stock >= 15 && product.stock < 30) {
-        setTextColor("text-yellow-500");
-        setCircleColor("bg-yellow-500");
-        setText("Stock running low");
+        status = {
+          textColor: "text-yellow-500",
+          circleColor: "bg-yellow-500",
+          text: "Stock running low",
+        };
       } else {
-        setTextColor("text-green-500");
-        setCircleColor("bg-green-500");
-        setText("In stock");
+        status = {
+          textColor: "text-green-500",
+          circleColor: "bg-green-500",
+          text: "In stock",
+        };
       }
+      setInventoryStatus(status);
     }
   }, [product]);
 
@@ -107,14 +118,6 @@ const DetailedProduct = () => {
 
   const sizes = product?.sizes ? JSON.parse(product.sizes[0]) : [];
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
-  }
-
   if (!product) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -129,6 +132,7 @@ const DetailedProduct = () => {
   return (
     <div className="container mx-auto px-4 py-6">
       <ToastContainer />
+      {loading && <LoadingOverlay />}
       <div className="flex flex-col lg:flex-row gap-6 mt-28 ">
         {/* Left Section: Image Gallery */}
         <div className="lg:w-1/2 flex flex-col gap-4">
@@ -174,9 +178,13 @@ const DetailedProduct = () => {
             Stock: <span className="font-semibold">{product.stock}</span>
           </p>
           {/* Inventory status */}
-          <div className="flex items-center justify-start gap-2">
-            <div className={`w-2 h-2 rounded-full  ${circleColor}`}></div>
-            <p className={`text-sm font-semibold ${textColor} `}>{text}</p>
+          <div className="flex items-center">
+            <div
+              className={`w-2 h-2 rounded-full ${inventoryStatus.circleColor}`}
+            ></div>
+            <p className={`ml-2 ${inventoryStatus.textColor}`}>
+              {inventoryStatus.text}
+            </p>
           </div>
 
           <p className="text-md text-gray-600 mb-4">

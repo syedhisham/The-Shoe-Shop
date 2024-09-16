@@ -16,7 +16,7 @@ const ProductUpdateForm = ({ productId, onClose }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
+
   useEffect(() => {
     const fetchProductData = async () => {
       try {
@@ -25,15 +25,15 @@ const ProductUpdateForm = ({ productId, onClose }) => {
         );
         const productData = response.data;
         setFormData({
-          name: productData.name || "",
-          description: productData.description || "",
-          price: productData.price || "",
+          name: productData.name,
+          description: productData.description,
+          price: productData.price,
           sizes: Array.isArray(productData.sizes) ? productData.sizes : [],
           availableColors: Array.isArray(productData.availableColors)
             ? productData.availableColors
             : [],
           category: productData.category || "",
-          stock: productData.stock || "",
+          stock: productData.stock,
         });
       } catch (err) {
         setError("Failed to fetch product data.");
@@ -55,7 +55,7 @@ const ProductUpdateForm = ({ productId, onClose }) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value ? value.split(",").map((item) => item.trim()) : [], // Ensure a default empty array if value is empty
+      [name]: value ? value.split(",").map((item) => item.trim()) : [],
     }));
   };
 
@@ -70,7 +70,7 @@ const ProductUpdateForm = ({ productId, onClose }) => {
         formData
       );
       SuccessToast("Product updated successfully");
-      onClose(); // Close the form after successful update
+      onClose();
     } catch (err) {
       setError("Failed to update product.");
       ErrorToast("Failed to update product.");
@@ -81,10 +81,10 @@ const ProductUpdateForm = ({ productId, onClose }) => {
 
   return (
     <div className="p-4 max-w-lg mx-auto bg-white rounded shadow-lg">
+      {loading && <LoadingOverlay />}
       <h2 className="text-xl font-bold mb-4">Update Product</h2>
       {error && <p className="text-red-500">{error}</p>}
       <form onSubmit={handleSubmit}>
-        {/* Name Field */}
         <div className="mb-4">
           <label
             htmlFor="name"
@@ -99,11 +99,9 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             value={formData.name}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full"
-            
           />
         </div>
 
-        {/* Description Field */}
         <div className="mb-4">
           <label
             htmlFor="description"
@@ -118,11 +116,9 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full"
             rows="4"
-            
           />
         </div>
 
-        {/* Price Field */}
         <div className="mb-4">
           <label
             htmlFor="price"
@@ -138,11 +134,9 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full"
             step="0.01"
-            
           />
         </div>
 
-        {/* Sizes Field */}
         <div className="mb-4">
           <label
             htmlFor="sizes"
@@ -154,13 +148,12 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             type="text"
             id="sizes"
             name="sizes"
-            value={(formData.sizes || []).join(", ")} // Default to an empty array if sizes is undefined
+            value={(formData.sizes || []).join(", ")}
             onChange={handleArrayChange}
             className="border border-gray-300 rounded p-2 w-full"
           />
         </div>
 
-        {/* Available Colors Field */}
         <div className="mb-4">
           <label
             htmlFor="availableColors"
@@ -172,7 +165,7 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             type="text"
             id="availableColors"
             name="availableColors"
-            value={(formData.availableColors || []).join(", ")} // Default to an empty array if availableColors is undefined
+            value={(formData.availableColors || []).join(", ")}
             onChange={handleArrayChange}
             className="border border-gray-300 rounded p-2 w-full"
           />
@@ -193,7 +186,6 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             value={formData.category}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full"
-            
           />
         </div>
 
@@ -212,25 +204,23 @@ const ProductUpdateForm = ({ productId, onClose }) => {
             value={formData.stock}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full"
-            
           />
         </div>
 
         <div className="flex justify-between">
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={onClose}
+          <button
+            className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
+            onClick={onClose}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded"
             disabled={loading}
           >
             {loading ? "Updating..." : "Update"}
           </button>
-          
         </div>
       </form>
     </div>
