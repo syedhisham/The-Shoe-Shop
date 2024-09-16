@@ -11,6 +11,7 @@ const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
     const response = await cloudinary.uploader.upload(localFilePath, {
+      folder: "the-shoe-shop-products",
       resource_type: "auto",
     });
     fs.unlinkSync(localFilePath);
@@ -23,8 +24,9 @@ const uploadOnCloudinary = async (localFilePath) => {
 };
 const deleteFromCloudinary = async (url, resourceType = "auto") => {
   try {
-    const publicId = url.split("/").pop().split(".")[0];
-    const response = await cloudinary.uploader.destroy(publicId, {
+    const publicIdWithFolder = url.split("/").slice(-2).join("/").split(".")[0];
+
+    const response = await cloudinary.uploader.destroy(publicIdWithFolder, {
       resource_type: resourceType,
     });
 

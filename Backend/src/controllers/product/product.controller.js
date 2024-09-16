@@ -18,13 +18,21 @@ const addProduct = asyncHandler(async (req, res) => {
     sizes = [],
     availableColors = [],
     category,
+    subcategory,
     stock,
   } = req.body;
 
   const colors = req.body.colors || [];
   const images = req.files || [];
 
-  if (!name || !price || colors.length === 0 || !category || !stock) {
+  if (
+    !name ||
+    !price ||
+    colors.length === 0 ||
+    !category ||
+    !stock ||
+    !subcategory
+  ) {
     throw new ApiError(400, "Fill the required fields");
   }
   if (!images || images.length === 0) {
@@ -44,6 +52,7 @@ const addProduct = asyncHandler(async (req, res) => {
     sizes,
     colors: availableColors,
     category,
+    subcategory,
     stock,
   });
   const savedProduct = await product.save();
@@ -51,7 +60,7 @@ const addProduct = asyncHandler(async (req, res) => {
   const saveImageUrl = resultOfUploadImagesOnCloudinary.map(
     (uploadedImage, index) => ({
       productId: savedProduct._id,
-      color: colors[index], // Assign color from the colors array
+      color: colors[index],
       imageUrl: uploadedImage.url,
     })
   );
@@ -279,34 +288,6 @@ const getAllProducts = asyncHandler(async (req, res) => {
   const aggregateQuery = Product.aggregate([
     {
       $lookup: {
-        from: "categories",
-        localField: "category",
-        foreignField: "_id",
-        as: "categoryDetails",
-      },
-    },
-    {
-      $unwind: {
-        path: "$categoryDetails",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $lookup: {
-        from: "categories",
-        localField: "categoryDetails.parent",
-        foreignField: "_id",
-        as: "parentCategoryDetails",
-      },
-    },
-    {
-      $unwind: {
-        path: "$parentCategoryDetails",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $lookup: {
         from: "images",
         localField: "_id",
         foreignField: "productId",
@@ -327,10 +308,8 @@ const getAllProducts = asyncHandler(async (req, res) => {
         price: { $first: "$price" },
         sizes: { $first: "$sizes" },
         colors: { $first: "$colors" },
-        category: { $first: "$categoryDetails._id" },
-        categoryName: { $first: "$categoryDetails.name" },
-        categoryParent: { $first: "$categoryDetails.parent" },
-        categoryParentName: { $first: "$parentCategoryDetails.name" },
+        category: { $first: "$category" },
+        subcategory: { $first: "$subcategory" },
         stock: { $first: "$stock" },
         images: { $push: "$productImages.imageUrl" },
         createdAt: { $first: "$createdAt" },
@@ -347,9 +326,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
         sizes: 1,
         colors: 1,
         category: 1,
-        categoryName: 1,
-        categoryParent: 1,
-        categoryParentName: 1,
+        subcategory: 1,
         stock: 1,
         images: 1,
         createdAt: 1,
@@ -416,18 +393,8 @@ const getProductById = asyncHandler(async (req, res) => {
         images: { $push: "$productImage.imageUrl" },
         stock: { $first: "$stock" },
         category: { $first: "$category" },
+        subcategory: { $first: "$subcategory" },
       },
-    },
-    {
-      $lookup: {
-        from: "categories",
-        localField: "category",
-        foreignField: "_id",
-        as: "productCategory",
-      },
-    },
-    {
-      $unwind: "$productCategory",
     },
     {
       $project: {
@@ -439,10 +406,8 @@ const getProductById = asyncHandler(async (req, res) => {
         colors: 1,
         images: 1,
         stock: 1,
-        category: {
-          name: "$productCategory.name",
-          description: "$productCategory.description",
-        },
+        category: 1,
+        subcategory: 1,
         totalImagesCount: 1,
       },
     },
@@ -540,42 +505,7 @@ const getAllTheImagesByColor = asyncHandler(async (req, res) => {
       new ApiResponse(200, imagesByColor, "All the images by color are fetched")
     );
 });
-const getAllCategories = asyncHandler(async (req, res) => {
-  const pipeline = [
-    {
-      $match: {
-        parent: null,
-      },
-    },
-    {
-      $lookup: {
-        from: "categories",
-        localField: "_id",
-        foreignField: "parent",
-        as: "subcategories",
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        name: 1,
-        description: 1,
-        subcategories: {
-          _id: 1,
-          name: 1,
-          description: 1,
-        },
-      },
-    },
-  ];
-  const categories = await Category.aggregate(pipeline);
-  if (!categories || categories.length === 0) {
-    throw new ApiError(500, "Something went wrong to fetch the categories");
-  }
-  return res
-    .status(200)
-    .json(new ApiResponse(200, categories, "All categories are fethced"));
-});
+
 
 export {
   addProduct,
@@ -588,5 +518,4 @@ export {
   getImageByColor,
   getColorsWithImages,
   getAllTheImagesByColor,
-  getAllCategories,
 };
