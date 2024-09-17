@@ -2,32 +2,33 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { Product } from "../../models/product/product.model.js";
-import { User } from "../../models/user/user.model.js";
 import { Comment } from "../../models/product/comment.model.js";
 import { Rating } from "../../models/product/rating.model.js";
 import mongoose from "mongoose";
-import { response } from "express";
 
 const createAComment = asyncHandler(async (req, res) => {
   const { comment } = req.body;
   if (!comment) {
     throw new ApiError(400, "Write to make a comment on the product");
   }
-  const { productId, userId } = req.params;
-  if (!productId || !userId) {
-    throw new ApiError(400, "Product and User Id's are required to proceed");
-  }
-  const user = await User.findById(userId).select("-password -refreshToken");
+  const user = req.user?._id;
   if (!user) {
-    throw new ApiError(404, "User not found");
+    throw new ApiError(403, "Sign in to comment");
+  }
+  const { productId } = req.params;
+  if (!productId) {
+    throw new ApiError(400, "Product and User Id's are required to proceed");
   }
   const product = await Product.findById(productId);
   if (!product) {
     throw new ApiError(404, "Product not found");
   }
+  console.log("Product ID:", req.params.productId);
+  console.log("User:", req.user?._id);
+  console.log("Comment:", req.body.comment);
   const commentOnAProduct = await Comment.create({
     product: productId,
-    user: userId,
+    user,
     comment,
   });
 
@@ -37,12 +38,13 @@ const createAComment = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUserComment = asyncHandler(async (req, res) => {
-  const { userId, productId } = req.params;
-  if (!userId || !productId) {
+  const { productId } = req.params;
+  if (!productId) {
     throw new ApiError(400, "User and Product Id's are required to proceed");
   }
+  const user = req.user?._id;
   const comment = await Comment.find({
-    user: userId,
+    user,
     product: productId,
   });
   if (!comment) {
@@ -193,7 +195,7 @@ const createARating = asyncHandler(async (req, res) => {
   if (!productId) {
     throw new ApiError(400, "Product Id is required to proceed");
   }
-  const user = req.user?._id
+  const user = req.user?._id;
   const product = await Product.findById(productId);
   if (!product) {
     throw new ApiError(404, "Product not found");
@@ -208,10 +210,7 @@ const createARating = asyncHandler(async (req, res) => {
       rate.rating = rating;
       await rate.save();
     } catch (error) {
-      throw new ApiError(
-        403,
-        "You are not authorized to add this rating"
-      );
+      throw new ApiError(403, "You are not authorized to add this rating");
     }
   } else {
     try {
@@ -301,7 +300,6 @@ const getAverageRating = asyncHandler(async (req, res) => {
   );
 });
 
-
 export {
   createAComment,
   getCurrentUserComment,
@@ -310,5 +308,5 @@ export {
   deleteAComment,
   createARating,
   getCurrentUserRating,
-  getAverageRating
+  getAverageRating,
 };
