@@ -5,6 +5,7 @@ import {
   createARating,
   deleteAComment,
   getAllCommentsOnAProduct,
+  getAllRatings,
   getAverageRating,
   getCurrentUserComment,
   getCurrentUserRating,
@@ -24,6 +25,7 @@ router.route("/product/:productId/all-comments").get(getAllCommentsOnAProduct);
 // Rating Routes
 router.route("/product/:productId/rating").post(verifyJWT, createARating);
 router.route("/product/:productId/rating").get(verifyJWT, getCurrentUserRating);
-router.route("/product/:productId/avg-rating").get(verifyJWT, getAverageRating);
+router.route("/product/:productId/avg-rating").get(getAverageRating);
+router.route("/product/:productId/rating-distribution").get(getAllRatings);
 
 export default router;
