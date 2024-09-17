@@ -132,6 +132,7 @@ const getAllCommentsOnAProduct = asyncHandler(async (req, res) => {
         createdAt: 1,
         "user.firstName": 1,
         "user.lastName": 1,
+        "user._id": 1,
       },
     },
   ]);
@@ -299,6 +300,41 @@ const getAverageRating = asyncHandler(async (req, res) => {
     )
   );
 });
+const getAllRatings = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+
+  if (!productId) {
+    throw new ApiError(400, "The product ID is required to proceed");
+  }
+
+  const ratings = await Rating.find({ product: productId });
+
+  if (!ratings || ratings.length === 0) {
+    throw new ApiError(404, "No ratings found for this product");
+  }
+
+  const totalUsers = ratings.length;
+
+  const ratingArray = [0, 0, 0, 0, 0];
+
+  ratings.forEach((rating) => {
+    const starRating = rating.rating;
+    if (starRating >= 1 && starRating <= 5) {
+      ratingArray[starRating - 1] += 1;
+    }
+  });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        totalUsers,
+        ratingDistribution: ratingArray,
+      },
+      "Ratings and total users fetched successfully"
+    )
+  );
+});
 
 export {
   createAComment,
@@ -309,4 +345,5 @@ export {
   createARating,
   getCurrentUserRating,
   getAverageRating,
+  getAllRatings,
 };
