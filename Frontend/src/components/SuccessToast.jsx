@@ -4,7 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 const SuccessToast = (message, options = {}) => {
   toast.success(message, {
     position: "top-center",
-    autoClose: 3000,
+    autoClose: 1000,
     hideProgressBar: true,
     closeOnClick: true,
     pauseOnHover: false,

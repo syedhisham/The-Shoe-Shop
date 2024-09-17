@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Input, Typography } from "@material-tailwind/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useNavigation } from "../context/NavigationContext";
 import axios from "axios";
 import SuccessToast from "../components/SuccessToast";
@@ -26,7 +26,9 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await axios.post("/api/users/login", formData);
-      console.log("Response data is", response.data);
+      console.log("Response data is", response.data.data.user._id);
+      const userId = response.data.data.user._id;
+      localStorage.setItem("userId", userId);
 
       const { token } = response.data;
       localStorage.setItem("token", token);

@@ -106,9 +106,7 @@ const ManageProducts = ({
     setFilteredProducts(filtered);
   };
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -153,21 +151,14 @@ const ManageProducts = ({
     }
   };
 
-  const handleProductUpdate = (productId) => {
-    setSelectedProductId(productId);
-  };
+  const handleProductUpdate = (productId) => setSelectedProductId(productId);
 
-  const handleCloseUpdateForm = () => {
-    setSelectedProductId(null);
-  };
+  const handleCloseUpdateForm = () => setSelectedProductId(null);
 
-  const handleUpdateClick = (productId) => {
+  const handleUpdateClick = (productId) =>
     setSelectedProductIdForImage(productId);
-  };
 
-  const handleCloseUpdateClick = () => {
-    setSelectedProductIdForImage(null);
-  };
+  const handleCloseUpdateClick = () => setSelectedProductIdForImage(null);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) {
@@ -183,13 +174,12 @@ const ManageProducts = ({
 
   const handleDetailedProduct = (productId, color) => {
     if (!productId) return;
+
     setProductId(productId);
-    navigate("/detailedProduct", { state: { productId, color } });
+    navigate(`/detailedProduct/${productId}?color=${color}`);
   };
 
-  const handleSearchClick = () => {
-    setIsSearchOpen(!isSearchOpen);
-  };
+  const handleSearchClick = () => setIsSearchOpen(!isSearchOpen);
 
   return (
     <div className="container mx-auto px-4">

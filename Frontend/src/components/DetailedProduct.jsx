@@ -3,15 +3,15 @@ import ErrorToast from "./ErrorToast";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
 import ManageProducts from "../pages/ManageProducts";
 import ReviewsOnProduct from "./ReviewsOnProduct";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import LoadingOverlay from "./LoadingOverlay";
+import { useParams } from "react-router-dom";
+import { Button } from "@material-tailwind/react";
 
 const DetailedProduct = () => {
-  const location = useLocation();
-  const { productId } = location.state || {};
+  const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
@@ -26,31 +26,30 @@ const DetailedProduct = () => {
   });
 
   useEffect(() => {
+    if (!productId) {
+      ErrorToast("Product ID is missing");
+      return;
+    }
+
     const fetchProductById = async () => {
       setLoading(true);
+
       try {
-        const response = await axios.get(
-          `/api/products/product-by-id/${productId}`
-        );
+        const response = await axios.get(`/api/products/product-by-id/${productId}`);
         const productDetails = response.data.data[0];
         setProduct(productDetails);
 
-        const colorsResponse = await axios.get(
-          `/api/products/colors-with-images/${productId}`
-        );
+        const colorsResponse = await axios.get(`/api/products/colors-with-images/${productId}`);
         const fetchedColorsWithImages = colorsResponse.data.data;
         setColorsWithImages(fetchedColorsWithImages);
 
         if (fetchedColorsWithImages.length > 0) {
           const firstColor = fetchedColorsWithImages[0].color;
 
-          const colorImagesResponse = await axios.get(
-            `/api/products/product/${productId}?color=${firstColor}`
-          );
+          const colorImagesResponse = await axios.get(`/api/products/product/${productId}?color=${firstColor}`);
           const fetchedImages = colorImagesResponse.data.data;
 
           setActiveImage(fetchedImages[0]?.imageUrl || "/default-image.jpg");
-
           setColorImages(fetchedImages);
         }
       } catch (error) {
@@ -60,9 +59,7 @@ const DetailedProduct = () => {
       }
     };
 
-    if (productId) {
-      fetchProductById();
-    }
+    fetchProductById();
   }, [productId]);
 
   useEffect(() => {
@@ -93,22 +90,17 @@ const DetailedProduct = () => {
 
   const handleColorClick = async (color) => {
     try {
-      const colorImagesResponse = await axios.get(
-        `/api/products/product/${productId}?color=${color}`
-      );
+      const colorImagesResponse = await axios.get(`/api/products/product/${productId}?color=${color}`);
       const fetchedImages = colorImagesResponse.data.data;
 
       if (Array.isArray(fetchedImages)) {
         setActiveImage(fetchedImages[0]?.imageUrl || "/default-image.jpg");
-
         setColorImages(fetchedImages);
       } else {
         throw new Error("Fetched data is not an array");
       }
     } catch (error) {
-      ErrorToast(
-        "Something went wrong while fetching the images for the selected color"
-      );
+      ErrorToast("Something went wrong while fetching the images for the selected color");
     }
   };
 
@@ -125,6 +117,7 @@ const DetailedProduct = () => {
       </div>
     );
   }
+
   const handleHeartClick = () => {
     setIsFilled(!isFilled);
   };
@@ -133,7 +126,7 @@ const DetailedProduct = () => {
     <div className="container mx-auto px-4 py-6">
       <ToastContainer />
       {loading && <LoadingOverlay />}
-      <div className="flex flex-col lg:flex-row gap-6 mt-28 ">
+      <div className="flex flex-col lg:flex-row gap-6 mt-12">
         {/* Left Section: Image Gallery */}
         <div className="lg:w-1/2 flex flex-col gap-4">
           <div className="border rounded-lg overflow-hidden">
@@ -179,9 +172,7 @@ const DetailedProduct = () => {
           </p>
           {/* Inventory status */}
           <div className="flex items-center">
-            <div
-              className={`w-2 h-2 rounded-full ${inventoryStatus.circleColor}`}
-            ></div>
+            <div className={`w-2 h-2 rounded-full ${inventoryStatus.circleColor}`}></div>
             <p className={`ml-2 ${inventoryStatus.textColor}`}>
               {inventoryStatus.text}
             </p>
@@ -233,9 +224,9 @@ const DetailedProduct = () => {
             </div>
           </div>
 
-          <button className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition duration-200 mt-4">
+          <Button size="lg" className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition duration-200 mt-4">
             Add to Cart
-          </button>
+          </Button>
         </div>
       </div>
       <div className="mt-5 mb-5">
