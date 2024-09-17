@@ -1,9 +1,8 @@
-import React from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SuccessToast = (message, options = {}) => {
-  toast.success(<div className="flex items-center">{message}</div>, {
+  toast.success(message, {
     position: "top-center",
     autoClose: 3000,
     hideProgressBar: true,

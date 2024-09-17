@@ -1,9 +1,8 @@
-import React from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ErrorToast = (message, options = {}) => {
-  toast.error(<div className="flex items-center">{message}</div>, {
+  toast.error(message, {
     position: "top-center",
     autoClose: 3000,
     hideProgressBar: true,
