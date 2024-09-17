@@ -29,7 +29,7 @@ function App() {
         <Route path="/updateProductDetails" element={<ProductUpdateForm />} />
         <Route path="/updateProductImages" element={<ProductUpdateImage />} />
         <Route path="/allProducts" element={<AllProducts />} />
-        <Route path="/detailedProduct" element={<DetailedProduct />} />
+        <Route path="/detailedProduct/:productId" element={<DetailedProduct />} />
         <Route path="/allUsers" element={<UserList />} />
         <Route path="/removeUser" element={<UserDeleteList />} />
         <Route path="/mostActiveUsers" element={<MostActiveUsers />} />
