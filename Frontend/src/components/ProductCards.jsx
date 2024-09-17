@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Carousel, IconButton } from "@material-tailwind/react";
+import { Carousel, IconButton, Button } from "@material-tailwind/react";
 import { FaEdit } from "react-icons/fa";
 
 const ProductCards = ({
@@ -96,7 +96,7 @@ const ProductCards = ({
                       <span
                         key={i}
                         className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
-                          activeIndex === i ? "w-8 bg-black" : "w-4 bg-gray-600"
+                          activeIndex === i ? "w-8 bg-gray-400" : "w-4 bg-gray-600"
                         }`}
                         onClick={() => setActiveIndex(i)}
                       />
@@ -106,10 +106,9 @@ const ProductCards = ({
                 prevArrow={({ handlePrev }) => (
                   <IconButton
                     variant="text"
-                    color="white"
                     size="lg"
                     onClick={handlePrev}
-                    className="!absolute top-2/4 left-4 -translate-y-2/4"
+                    className="!absolute top-2/4 left-4 -translate-y-2/4 bg-white/20 text-gray-400"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -130,10 +129,9 @@ const ProductCards = ({
                 nextArrow={({ handleNext }) => (
                   <IconButton
                     variant="text"
-                    color="white"
                     size="lg"
                     onClick={handleNext}
-                    className="!absolute top-2/4 !right-4 -translate-y-2/4"
+                    className="!absolute top-2/4 !right-4 -translate-y-2/4 bg-white/20 text-gray-400"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -161,7 +159,7 @@ const ProductCards = ({
                         className="h-80 w-full object-cover"
                       />
                       <FaEdit
-                        className="absolute bottom-4 right-4 text-gray-900 text-xl cursor-pointer"
+                        className="absolute bottom-4 right-4 text-gray-400 text-xl cursor-pointer"
                         onClick={() => onUpdateImage(product._id)}
                       />
                     </div>
@@ -174,7 +172,7 @@ const ProductCards = ({
                       className="h-48 w-full object-cover"
                     />
                     <FaEdit
-                      className="absolute bottom-4 right-4 text-white text-xl cursor-pointer"
+                      className="absolute bottom-4 right-4 text-gray-400 text-xl cursor-pointer"
                       onClick={() => onUpdateImage(product._id)}
                     />
                   </div>
@@ -232,7 +230,7 @@ const ProductCards = ({
             </p>
 
             {!productDetails && (
-              <div className="p-6 bg-white border rounded-lg">
+              <div className="p-6  border rounded-lg">
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <span className="font-medium text-gray-700 w-36">
@@ -270,18 +268,18 @@ const ProductCards = ({
           </div>
           {!productDetails && (
             <div className="flex px-6 py-4 justify-between">
-              <button
+              <Button
                 onClick={() => onDelete(product._id)}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
               >
                 Delete
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => onUpdate(product._id)}
-                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
               >
                 Update
-              </button>
+              </Button>
             </div>
           )}
         </div>

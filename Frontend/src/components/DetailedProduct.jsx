@@ -35,18 +35,24 @@ const DetailedProduct = () => {
       setLoading(true);
 
       try {
-        const response = await axios.get(`/api/products/product-by-id/${productId}`);
+        const response = await axios.get(
+          `/api/products/product-by-id/${productId}`
+        );
         const productDetails = response.data.data[0];
         setProduct(productDetails);
 
-        const colorsResponse = await axios.get(`/api/products/colors-with-images/${productId}`);
+        const colorsResponse = await axios.get(
+          `/api/products/colors-with-images/${productId}`
+        );
         const fetchedColorsWithImages = colorsResponse.data.data;
         setColorsWithImages(fetchedColorsWithImages);
 
         if (fetchedColorsWithImages.length > 0) {
           const firstColor = fetchedColorsWithImages[0].color;
 
-          const colorImagesResponse = await axios.get(`/api/products/product/${productId}?color=${firstColor}`);
+          const colorImagesResponse = await axios.get(
+            `/api/products/product/${productId}?color=${firstColor}`
+          );
           const fetchedImages = colorImagesResponse.data.data;
 
           setActiveImage(fetchedImages[0]?.imageUrl || "/default-image.jpg");
@@ -90,7 +96,9 @@ const DetailedProduct = () => {
 
   const handleColorClick = async (color) => {
     try {
-      const colorImagesResponse = await axios.get(`/api/products/product/${productId}?color=${color}`);
+      const colorImagesResponse = await axios.get(
+        `/api/products/product/${productId}?color=${color}`
+      );
       const fetchedImages = colorImagesResponse.data.data;
 
       if (Array.isArray(fetchedImages)) {
@@ -100,7 +108,9 @@ const DetailedProduct = () => {
         throw new Error("Fetched data is not an array");
       }
     } catch (error) {
-      ErrorToast("Something went wrong while fetching the images for the selected color");
+      ErrorToast(
+        "Something went wrong while fetching the images for the selected color"
+      );
     }
   };
 
@@ -152,7 +162,9 @@ const DetailedProduct = () => {
 
         <div className="lg:w-1/2 flex flex-col gap-4 p-4 border rounded-lg">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
+            <h1 className="text-3xl font-semibold mb-2">
+              {product.name.toUpperCase()}
+            </h1>
             <div
               className="cursor-pointer text-2xl transition-colors duration-300"
               onClick={handleHeartClick}
@@ -172,7 +184,9 @@ const DetailedProduct = () => {
           </p>
           {/* Inventory status */}
           <div className="flex items-center">
-            <div className={`w-2 h-2 rounded-full ${inventoryStatus.circleColor}`}></div>
+            <div
+              className={`w-2 h-2 rounded-full ${inventoryStatus.circleColor}`}
+            ></div>
             <p className={`ml-2 ${inventoryStatus.textColor}`}>
               {inventoryStatus.text}
             </p>
@@ -224,17 +238,26 @@ const DetailedProduct = () => {
             </div>
           </div>
 
-          <Button size="lg" className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition duration-200 mt-4">
+          <Button
+            size="lg"
+            className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition duration-200 mt-4"
+          >
             Add to Cart
           </Button>
         </div>
       </div>
       <div className="mt-5 mb-5">
-        <p className="text-2xl font-semibold ">Rate the Product</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Your Rating Matters
+        </h2>
+        <p className="text-gray-600 text-sm">
+          We value your feedback! Help us improve by rating the product.
+        </p>
+
         <ReviewsOnProduct />
       </div>
       <div className="manageProducts">
-        <p className="text-3xl font-semibold">Suggested Products</p>
+        <p className="text-2xl font-semibold">You May Also Like</p>
         <ManageProducts
           renderSmallCard={false}
           allProductProp={true}

@@ -249,10 +249,10 @@ const AddProductForm = () => {
             type="Button"
             size="lg"
             onClick={() => handleCategorySelect("Gents Footwear")}
-            className={`px-4 py-2 rounded-md text-white ${
+            className={`px-4 py-2 rounded-md  hover:bg-gray-400 text-black ${
               formData.category === "Gents Footwear"
-                ? "bg-gray-800"
-                : "bg-black"
+                ? "bg-gray-300"
+                : "bg-gray-400"
             }`}
           >
             Gents Footwear
@@ -261,10 +261,10 @@ const AddProductForm = () => {
             type="Button"
             size="lg"
             onClick={() => handleCategorySelect("Ladies Footwear")}
-            className={`px-4 py-2 rounded-md text-white ${
+            className={`px-4 py-2 rounded-md  hover:bg-gray-400 text-black ${
               formData.category === "Ladies Footwear"
-                ? "bg-gray-800"
-                : "bg-black"
+                ? "bg-gray-300"
+                : "bg-gray-400"
             }`}
           >
             Ladies Footwear
@@ -383,7 +383,6 @@ const AddProductForm = () => {
           </label>
           {imageColorPairs.map((pair, index) => (
             <div key={index} className="relative mb-4">
-              {/* Image Preview */}
               {selectedFiles[index] && (
                 <div className="relative">
                   <img
@@ -415,12 +414,38 @@ const AddProductForm = () => {
               )}
 
               {!selectedFiles[index] && (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleFileChange(index, e)}
-                  className="w-full mt-2 mb-2"
-                />
+               <Button  className="flex items-center gap-3 bg-gray-300 text-black hover:bg-gray-400 mb-2" type="button" size="sm">
+               <label className="flex items-center gap-3 cursor-pointer">
+                 <input
+                   type="file"
+                   className="hidden"
+                   onChange={(e) => handleFileChange(index, e)} 
+                 />
+                 <svg
+                   xmlns="http://www.w3.org/2000/svg"
+                   fill="none"
+                   viewBox="0 0 24 24"
+                   strokeWidth={2}
+                   stroke="currentColor"
+                   className="h-5 w-5"
+                 >
+                   <path
+                     strokeLinecap="round"
+                     strokeLinejoin="round"
+                     d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
+                   />
+                 </svg>
+                 Upload Files
+               </label>
+             </Button>
+             
+
+                // <input
+                //   type="file"
+                //   accept="image/*"
+                //   onChange={(e) => handleFileChange(index, e)}
+                //   className="w-full mt-2 mb-2"
+                // />
               )}
               <Input
                 type="text"
@@ -443,7 +468,7 @@ const AddProductForm = () => {
           <Button
             type="Button"
             onClick={handleAddImageColorPair}
-            className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-md transition-colors"
+            className="bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded-md transition-colors"
           >
             Add Another Image
           </Button>

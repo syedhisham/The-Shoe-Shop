@@ -350,7 +350,7 @@ const ReviewsOnProduct = () => {
                     <div className="flex gap-2">
                       <Button
                         type="submit"
-                        className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-lg"
+                        className="bg-gray-500 hover:bg-gray-400 text-white py-2 px-4 rounded-lg"
                       >
                         Save
                       </Button>

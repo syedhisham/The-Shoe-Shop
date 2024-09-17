@@ -4,7 +4,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ErrorToast from "./ErrorToast";
 import LoadingOverlay from "./LoadingOverlay";
-import { Button, Input } from "@material-tailwind/react";
+import { Button, Input, IconButton } from "@material-tailwind/react";
+import { CiSearch } from "react-icons/ci";
 
 const UserList = ({ onDelete, showFullDetails = true }) => {
   const [users, setUsers] = useState([]);
@@ -14,6 +15,7 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers(page, limit);
@@ -66,6 +68,8 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
 
   const totalPages = Math.ceil(totalUsers / limit);
 
+  const handleSearchClick = () => setIsSearchOpen(!isSearchOpen);
+
   return (
     <div className="max-w-[80%] mx-auto p-4">
       {showFullDetails && (
@@ -80,19 +84,40 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
         <>
           {error && <p className="text-red-500 text-center">{error}</p>}
 
-          <div className="mb-4">
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md"
-              label="Type to Search"
+
+          <div className="my-4 flex items-center">
+            <IconButton
+              className="mt-4"
               variant="outlined"
-              size="lg"
-              color="blue"
-              placeholder="Search by email..."
-            />
+              onClick={handleSearchClick}
+            >
+              <CiSearch
+                className="cursor-pointer text-gray-600 transition-transform duration-300 hover:scale-110"
+                style={{ color: "black", fontSize: "2.5em" }}
+                size={24}
+              />
+            </IconButton>
+
+            <div
+              className={`transition-all duration-500 ease-in-out ml-2 pt-5 overflow-hidden ${
+                isSearchOpen ? "w-full" : "w-0"
+              }`}
+            >
+              <Input
+                variant="standard"
+                type="text"
+                label="Type to search"
+                placeholder="Search by product name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`pl-4 pr-4 py-2 w-full shadow-sm transition duration-300 transform ${
+                  isSearchOpen ? "scale-100" : "scale-0"
+                }`}
+              />
+            </div>
           </div>
+
+         
 
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -186,17 +211,17 @@ const UserList = ({ onDelete, showFullDetails = true }) => {
 
           <div className="flex flex-col md:flex-row justify-between items-center mt-4 space-y-2 md:space-y-0">
             <Button
-              className="bg-black hover:bg-gray-700 text-white px-4 py-2 rounded  w-full md:w-auto"
+              className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded  w-full md:w-auto"
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1}
             >
               Previous
             </Button>
-            <span className="text-gray-700 text-sm md:text-base">
+            <span className="text-gray-700 text-sm ">
               Page {page} of {totalPages}
             </span>
             <Button
-              className="bg-black hover:bg-gray-700 text-white px-4 py-2 rounded w-full md:w-auto"
+              className="bg-gray-300 hover:bg-gray-400 text-black px-4 py-2 rounded w-full md:w-auto"
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPages}
             >
