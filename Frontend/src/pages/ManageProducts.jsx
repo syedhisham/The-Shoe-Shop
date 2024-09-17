@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import ProductCards from "../components/ProductCards";
 import { ToastContainer } from "react-toastify";
@@ -9,6 +9,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 import ProductUpdateForm from "./ProductUpdateForm";
 import ProductUpdateImage from "./ProductUpdateImage";
 import { useNavigate } from "react-router-dom";
+import { ProductContext } from "../context/ProductContext";
 import {
   Button,
   IconButton,
@@ -37,7 +38,7 @@ const ManageProducts = ({
   const [selectedProductIdForImage, setSelectedProductIdForImage] =
     useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
+  const { setProductId } = useContext(ProductContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -182,6 +183,7 @@ const ManageProducts = ({
 
   const handleDetailedProduct = (productId, color) => {
     if (!productId) return;
+    setProductId(productId);
     navigate("/detailedProduct", { state: { productId, color } });
   };
 

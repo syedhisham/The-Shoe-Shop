@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button, Input, Typography } from "@material-tailwind/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigation } from "../context/NavigationContext";
 import axios from "axios";
 import SuccessToast from "../components/SuccessToast";
 import ErrorToast from "../components/ErrorToast";
@@ -14,6 +15,7 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { lastPath } = useNavigation();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,9 +26,13 @@ const Login = () => {
     setLoading(true);
     try {
       const response = await axios.post("/api/users/login", formData);
+      console.log("Response data is", response.data);
+
+      const { token } = response.data;
+      localStorage.setItem("token", token);
       SuccessToast("Login successful!");
       setFormData({ email: "", password: "" });
-      navigate("/");
+      navigate(lastPath || "/");
     } catch (error) {
       console.error(error);
       ErrorToast("Error logging in. Please check your credentials.");
