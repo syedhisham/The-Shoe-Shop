@@ -1,12 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { CarouselCustom } from "../components/CarouselCustom";
 import Header from "../components/Header";
 import AllProducts from "../components/AllProducts";
 
 const Home = () => {
+  const [searchVisible, setSearchVisible] = useState(false);
+
+  const toggleSearch = () => {
+    setSearchVisible(!searchVisible);
+  };
+
   return (
     <div>
-      <Header />
+      <div className="">
+        <Header onSearchClick={toggleSearch} searchVisible={searchVisible} />
+      </div>
       <CarouselCustom />
       <div>
         <div>

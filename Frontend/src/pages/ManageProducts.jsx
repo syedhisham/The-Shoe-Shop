@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProductCards from "../components/ProductCards";
 import { ToastContainer } from "react-toastify";
@@ -8,7 +9,6 @@ import ErrorToast from "../components/ErrorToast";
 import LoadingOverlay from "../components/LoadingOverlay";
 import ProductUpdateForm from "./ProductUpdateForm";
 import ProductUpdateImage from "./ProductUpdateImage";
-import { useNavigate } from "react-router-dom";
 import { ProductContext } from "../context/ProductContext";
 import {
   Button,
@@ -18,6 +18,7 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { CiSearch } from "react-icons/ci";
+import { useSearchParams } from "react-router-dom";
 
 const ManageProducts = ({
   renderSmallCard = false,
@@ -40,10 +41,18 @@ const ManageProducts = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { setProductId } = useContext(ProductContext);
   const navigate = useNavigate();
+  const [allProducts, setAllProducts] = useState([]);
+
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
     fetchProducts();
-  }, [currentPage]);
+  }, [currentPage, searchQuery]);
+
+  useEffect(() => {
+    filterProducts();
+  }, [searchQuery, selectedCategory, selectedSubcategory, products]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -54,7 +63,7 @@ const ManageProducts = ({
       if (response.data && response.data.data) {
         const productDetails = response.data.data.ProductDetails || [];
         setProducts(productDetails);
-        setFilteredProducts(productDetails);
+        setAllProducts(productDetails);
         setTotalPages(response.data.data.TotalPages || 1);
 
         const categoriesSet = new Set(productDetails.map((p) => p.category));
@@ -78,12 +87,8 @@ const ManageProducts = ({
     }
   };
 
-  useEffect(() => {
-    filterProducts();
-  }, [searchTerm, selectedCategory, selectedSubcategory, products]);
-
   const filterProducts = () => {
-    let filtered = products;
+    let filtered = allProducts;
 
     if (selectedCategory !== "All") {
       filtered = filtered.filter(
@@ -97,9 +102,9 @@ const ManageProducts = ({
       );
     }
 
-    if (searchTerm) {
+    if (searchQuery) {
       filtered = filtered.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -253,7 +258,6 @@ const ManageProducts = ({
                 </Button>
               ))}
           </div>
-
           {subcategories.length > 0 && (
             <div className="my-4">
               <Select

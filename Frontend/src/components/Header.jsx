@@ -13,11 +13,13 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
+  Input,
   Button,
 } from "@material-tailwind/react";
 import { HiBars3, HiOutlineXMark } from "react-icons/hi2";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const gentsFootWearMenuItems = [
   { title: "SHOES" },
@@ -105,12 +107,15 @@ function NavList() {
   );
 }
 
-const Header = () => {
+const Header = ({ onSearchClick, searchVisible }) => {
   const [openNav, setOpenNav] = useState(false);
   const [navbarPosition, setNavbarPosition] = useState("top-8");
   const [navbarHeight, setNavbarHeight] = useState("h-[8rem]");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userFirstName, setUserFirstName] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserFirstName = async () => {
@@ -152,6 +157,18 @@ const Header = () => {
     );
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      setErrorMessage("Please enter a product name to begin your search.");
+      setInterval(() => {
+        setErrorMessage("");
+      }, 2000);
+      return;
+    }
+    navigate(`/allProducts?search=${encodeURIComponent(searchQuery)}`);
+  };
+
   return (
     <div>
       <h1 className="flex bg-black text-white h-8 justify-center items-center">
@@ -190,11 +207,8 @@ const Header = () => {
               <>
                 <NavLink to="/login">
                   <div className="flex justify-center items-center">
-                    <div className="w-[6px] h-10 bg-blue-800 rounded-l-3xl sm:h-9 md:h-9 "></div>
-                    <Typography
-                      variant="text"
-                      className="p-2 text-sm sm:text-sm md:text-sm lg:lg xl:lg "
-                    >
+                    <div className=" w-2 max-h-6 bg-black sm:h-9 md:h-9 "></div>
+                    <Typography className="p-2 text-sm sm:text-sm md:text-sm lg:lg xl:lg ">
                       Sign in
                     </Typography>
                   </div>
@@ -202,11 +216,8 @@ const Header = () => {
 
                 <NavLink to="/register">
                   <div className="flex justify-center items-center">
-                    <div className="w-[6px] h-10 bg-blue-800 rounded-l-3xl sm:h-9 md:h-9 "></div>
-                    <Typography
-                      variant="text"
-                      className="p-2 text-sm sm:text-sm md:text-sm lg:lg xl:lg "
-                    >
+                    <div className="w-2 max-h-6 bg-black  sm:h-9 md:h-9 "></div>
+                    <Typography className="p-2 text-sm sm:text-sm md:text-sm lg:lg xl:lg ">
                       Sign Up
                     </Typography>
                   </div>
@@ -215,18 +226,55 @@ const Header = () => {
             )}
           </div>
           <div className="hidden gap-2 lg:flex items-center mr-2">
-            <IconButton className="bg-white ml-5">
-              <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
-            </IconButton>
+            <div className="">
+              <IconButton className="bg-white" onClick={onSearchClick}>
+                <CiSearch style={{ color: "black", fontSize: "2.5em" }} />
+              </IconButton>
+            </div>
+
+            <div
+              className={`absolute inset-x-0 mx-auto w-1/2 bg-white/80 p-2 shadow-lg transition-all duration-500 ease-in-out top-full rounded-sm mt-1  ${
+                searchVisible ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
+              }`}
+              style={{ maxWidth: "600px" }}
+            >
+              {" "}
+              <form onSubmit={handleSearchSubmit} className="flex">
+                <Input
+                  variant="standard"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  label="Type to search"
+                  placeholder="Search by product name"
+                  className="w-full p-2 border border-gray-300 rounded-md border-none"
+                  min={1}
+                />
+                <div className="flex flex-col">
+                  <Button type="submit" className="">
+                    Search
+                  </Button>
+                </div>
+              </form>
+              {errorMessage && (
+                <p
+                  className={`absolute inset-x-0 mx-auto w-2/3 bg-white/80 text-red-500 text-sm text-center font-semibold p-2 shadow-lg transition-all duration-900 ease-in-out top-full rounded-sm mt-1  ${
+                    searchVisible ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
+                  }`}
+                  style={{ maxWidth: "600px" }}
+                >
+                  {errorMessage}
+                </p>
+              )}
+            </div>
             <IconButton className="bg-white">
               <CiShoppingCart style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
           </div>
           <div className="flex items-center">
-            <IconButton
-              variant="text"
-              color="blue-gray"
-              className="lg:hidden"
+            <button
+              color="white"
+              className="lg:hidden mr-1"
               onClick={() => setOpenNav(!openNav)}
             >
               {openNav ? (
@@ -234,7 +282,7 @@ const Header = () => {
               ) : (
                 <HiBars3 className="h-6 w-6" strokeWidth={2} />
               )}
-            </IconButton>
+            </button>
             {isAuthenticated ? (
               <div className="w-full flex items-center justify-center">
                 <AvatarWithUserDropdown />
