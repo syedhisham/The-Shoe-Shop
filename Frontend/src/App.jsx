@@ -14,6 +14,8 @@ import ProductUpdateForm from "./pages/ProductUpdateForm";
 import ProductUpdateImage from "./pages/ProductUpdateImage";
 import AllProducts from "./components/AllProducts";
 import DetailedProduct from "./components/DetailedProduct";
+import MostRatedProducts from "./components/MostRatedProducts";
+import CustomerTestimonials from "./components/Testimonials";
 
 function App() {
   return (
@@ -29,10 +31,12 @@ function App() {
         <Route path="/updateProductDetails" element={<ProductUpdateForm />} />
         <Route path="/updateProductImages" element={<ProductUpdateImage />} />
         <Route path="/allProducts" element={<AllProducts />} />
+        <Route path="/mostRatedProducts" element={<MostRatedProducts />} />
         <Route path="/detailedProduct/:productId" element={<DetailedProduct />} />
         <Route path="/allUsers" element={<UserList />} />
         <Route path="/removeUser" element={<UserDeleteList />} />
         <Route path="/mostActiveUsers" element={<MostActiveUsers />} />
+        <Route path="/testimonials" element={<CustomerTestimonials/>} />
       </Routes>
     </Router>
   );
