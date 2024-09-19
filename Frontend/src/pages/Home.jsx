@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { CarouselCustom } from "../components/CarouselCustom";
 import Header from "../components/Header";
-import AllProducts from "../components/AllProducts";
+import MostRatedProducts from "../components/MostRatedProducts";
+import Testimonials from "../components/Testimonials";
+import BlogSection from "../components/BlogSection";
 
 const Home = () => {
   const [searchVisible, setSearchVisible] = useState(false);
@@ -181,7 +183,56 @@ const Home = () => {
       <div className="">
         <h1 className="text-center text-3xl mt-5 mb-3">Best Sellers</h1>
         <div className="">
-          <AllProducts />
+          <MostRatedProducts />
+        </div>
+
+        <div className="relative w-full h-[50vh] flex items-center justify-center overflow-hidden mb-20">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "url('https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')",
+            }}
+          >
+            <div className="w-full h-full bg-black opacity-40"></div>
+          </div>
+
+          {/* Text Content */}
+          <h1 className="relative text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-semibold leading-tight px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 text-white drop-shadow-lg">
+            Contemporary Fashion, Weekly Updates. Premium Quality and Timely
+            Dispatch
+          </h1>
+        </div>
+
+        <div className="container mx-auto px-4 py-8 flex flex-col lg:flex-row items-center justify-center gap-8">
+          {/* Image Container */}
+          <div className="flex-shrink-0 w-full lg:w-1/3">
+            <img
+              src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Descriptive image"
+              className="w-full h-auto rounded-lg shadow-md object-cover"
+            />
+          </div>
+          {/* Text Content */}
+          <div className="flex-1 w-full lg:w-2/3">
+            <p className="text-base md:text-lg lg:text-xl xl:text-2xl font-light text-gray-700 leading-relaxed">
+              <span className="font-semibold">
+                Discover Timeless Elegance and Modern Comfort.
+              </span>{" "}
+              Explore our curated collection of premium fashion essentials
+              designed to offer exceptional style and unparalleled quality. Each
+              piece is crafted with meticulous attention to detail and delivered
+              with prompt service, ensuring that you experience both
+              sophistication and convenience in every purchase.
+            </p>
+          </div>
+        </div>
+
+        <div className="">
+          <Testimonials />
+        </div>
+        <div className="">
+          <BlogSection />
         </div>
       </div>
     </div>
