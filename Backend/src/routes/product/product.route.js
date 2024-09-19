@@ -9,6 +9,7 @@ import {
   getColorsWithImages,
   getImageByColor,
   getImageById,
+  getMostRatedProducts,
   getProductById,
   removeProduct,
   updateProductDetails,
@@ -23,6 +24,7 @@ router.route("/image-by-id/:imageId").get(getImageById);
 router.route("/image-by-color/:productId/:color").get(getImageByColor);
 router.route("/colors-with-images/:productId").get(getColorsWithImages);
 router.route("/product/:productId").get(getAllTheImagesByColor);
+router.route("/most-rated-products").get(getMostRatedProducts);
 //Secure Routes
 router
   .route("/add-product")

@@ -3,7 +3,7 @@ import { ApiResponse } from "../../utils/ApiResponse.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Product } from "../../models/product/product.model.js";
 import { Image } from "../../models/product/image.model.js";
-import { Category } from "../../models/product/category.model.js";
+import { Rating } from "../../models/product/rating.model.js";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
@@ -505,7 +505,75 @@ const getAllTheImagesByColor = asyncHandler(async (req, res) => {
       new ApiResponse(200, imagesByColor, "All the images by color are fetched")
     );
 });
+const getMostRatedProducts = asyncHandler(async (req, res) => {
+  const mostRatedProducts = await Rating.aggregate([
+    {
+      $group: {
+        _id: "$product",
+        averageRating: { $avg: "$rating" },
+      },
+    },
+    {
+      $sort: { averageRating: -1 },
+    },
+    {
+      $limit: 8,
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "_id",
+        as: "productDetails",
+      },
+    },
+    {
+      $unwind: "$productDetails",
+    },
+    {
+      $lookup: {
+        from: "images",
+        localField: "_id",
+        foreignField: "productId",
+        as: "imagesDetails",
+      },
+    },
+    {
+      $unwind: {
+        path: "$imagesDetails",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        product: { $first: "$productDetails" },
+        averageRating: { $first: "$averageRating" },
+        images: { $push: "$imagesDetails.imageUrl" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        product: 1,
+        averageRating: 1,
+        images: 1,
+      },
+    },
+  ]);
 
+  console.log("These are the most rated products", mostRatedProducts);
+
+  if (mostRatedProducts.length === 0) {
+    throw new ApiError(404, "No Ratings found for any product");
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, mostRatedProducts, "Most Rated products are fetched")
+    );
+});
 
 export {
   addProduct,
@@ -518,4 +586,5 @@ export {
   getImageByColor,
   getColorsWithImages,
   getAllTheImagesByColor,
+  getMostRatedProducts,
 };
