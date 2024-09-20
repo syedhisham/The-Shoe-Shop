@@ -562,8 +562,6 @@ const getMostRatedProducts = asyncHandler(async (req, res) => {
     },
   ]);
 
-  console.log("These are the most rated products", mostRatedProducts);
-
   if (mostRatedProducts.length === 0) {
     throw new ApiError(404, "No Ratings found for any product");
   }
