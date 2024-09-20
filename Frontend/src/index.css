@@ -65,3 +65,7 @@
   animation: fadeIn 0.3s ease-in-out forwards;
 }
 
+.leaflet-container {
+  height: 400px;
+  width: 100%;
+}
