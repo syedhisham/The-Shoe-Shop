@@ -238,11 +238,17 @@ const Home = () => {
         </div>
         <section className="py-20 mx-auto container px-8 bg-gray-900 rounded-2xl mb-20">
           <div className="grid lg:grid-cols-2 grid-cols-1 gap-4 !items-center">
-            <p className="text-white !font-semibold"> 
+            <p className="text-white !font-semibold">
               Stay in the Know: Subscribe for Exclusive Updates
-              <span className="lg:inline-block font-thin">Get first access to exclusive offers, product launches, and expert tips. Stay informed and ahead—subscribe now for updates tailored just for you!</span> 
+              <span className="lg:inline-block font-thin">
+                Get first access to exclusive offers, product launches, and
+                expert tips. Stay informed and ahead—subscribe now for updates
+                tailored just for you!
+              </span>
             </p>
-            <div className="flex items-start flex-col gap-4 md:flex-row">
+            <div
+              className="flex items-start flex-col gap-4 md:flex-row"
+            >
               <Input
                 color="white"
                 label="Enter your email"
@@ -254,7 +260,9 @@ const Home = () => {
             </div>
           </div>
         </section>
-        <div className=""><Footer/></div>
+        <div className="">
+          <Footer />
+        </div>
       </div>
     </div>
   );
