@@ -17,6 +17,8 @@ import DetailedProduct from "./components/DetailedProduct";
 import MostRatedProducts from "./components/MostRatedProducts";
 import CustomerTestimonials from "./components/Testimonials";
 import Layout from "./components/Layout";
+import ContactUs from "./components/ContactUs";
+import AboutUs from "./pages/AboutUs";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
         <Route element={<Layout />} >
         <Route path="/allProducts" element={<AllProducts />} />
         <Route path="/detailedProduct/:productId" element={<DetailedProduct />} />
+        <Route path="/contactUs" element={<ContactUs />} />
+        <Route path="/aboutUs" element={<AboutUs />} />
         
         </Route>
         <Route path="/" element={<Home />} />
