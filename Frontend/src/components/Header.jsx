@@ -168,6 +168,9 @@ const Header = ({ onSearchClick, searchVisible }) => {
     }
     navigate(`/allProducts?search=${encodeURIComponent(searchQuery)}`);
   };
+  const handleHomeNavigate = () => {
+    navigate("/");
+  };
 
   return (
     <div>
@@ -180,8 +183,9 @@ const Header = ({ onSearchClick, searchVisible }) => {
         <div className="flex items-center justify-between text-blue-gray-900 h-full">
           <div>
             <img
-              className={`w-24 sm:w-22 md:w-40 lg:w-30 xl:w-40 2xl:w-54 h-auto transition-all duration-300`}
+              className={`w-24 sm:w-22 md:w-40 lg:w-30 xl:w-40 2xl:w-54 h-auto transition-all duration-300 cursor-pointer`}
               src={logo}
+              onClick={handleHomeNavigate}
               alt="Logo"
             />
           </div>
