@@ -16,11 +16,17 @@ import AllProducts from "./components/AllProducts";
 import DetailedProduct from "./components/DetailedProduct";
 import MostRatedProducts from "./components/MostRatedProducts";
 import CustomerTestimonials from "./components/Testimonials";
+import Layout from "./components/Layout";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route element={<Layout />} >
+        <Route path="/allProducts" element={<AllProducts />} />
+        <Route path="/detailedProduct/:productId" element={<DetailedProduct />} />
+        
+        </Route>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
@@ -32,7 +38,6 @@ function App() {
         <Route path="/updateProductImages" element={<ProductUpdateImage />} />
         <Route path="/allProducts" element={<AllProducts />} />
         <Route path="/mostRatedProducts" element={<MostRatedProducts />} />
-        <Route path="/detailedProduct/:productId" element={<DetailedProduct />} />
         <Route path="/allUsers" element={<UserList />} />
         <Route path="/removeUser" element={<UserDeleteList />} />
         <Route path="/mostActiveUsers" element={<MostActiveUsers />} />
