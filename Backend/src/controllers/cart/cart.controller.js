@@ -4,6 +4,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { Cart } from "../../models/cart/cart.model.js";
 import { Product } from "../../models/product/product.model.js";
 import { User } from "../../models/user/user.model.js";
+import mongoose from "mongoose";
 
 const createCart = asyncHandler(async (req, res) => {
   const { quantity, size, color } = req.body;
@@ -34,13 +35,14 @@ const createCart = asyncHandler(async (req, res) => {
 
   if (cart) {
     const existingItemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === productId
+      (item) =>
+        item.product.toString() === productId &&
+        item.color === defaultColor &&
+        item.size === defaultSize
     );
 
     if (existingItemIndex !== -1) {
       cart.items[existingItemIndex].quantity += quantity;
-      cart.items[existingItemIndex].size = defaultSize;
-      cart.items[existingItemIndex].color = defaultColor;
     } else {
       cart.items.push({
         product: product._id,
@@ -76,28 +78,81 @@ const createCart = asyncHandler(async (req, res) => {
     .status(201)
     .json(new ApiResponse(201, cart, "Cart created/updated successfully"));
 });
-const getCart = asyncHandler(async(req,res) => {
-    const {cartId, userId} = req.params;
-    if (!cartId || !userId) {
-        throw new ApiError(400, "Cart Id is required to proceed")
-    }
-    const user = await User.findById(userId).select("-password -refreshToken")
-    if (!user) {
-        throw new ApiError(404, "User not found")
-    }
-    const cart = await Cart.find({_id: cartId,user: user._id})
-    if (!cart) {
-        throw new ApiError(404, "Cart not found")
-    }
-    return res 
-    .status(201)
-    .json(
-        new ApiResponse(
-            201,
-            cart,
-            "Cart fetched successfuly"
-        )
-    )
-})
+
+const getCart = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    throw new ApiError(400, "User ID is required to proceed");
+  }
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const cart = await Cart.aggregate([
+    {
+      $match: { user: new mongoose.Types.ObjectId(userId) },
+    },
+    {
+      $unwind: "$items",
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "items.product",
+        foreignField: "_id",
+        as: "productDetails",
+      },
+    },
+    {
+      $unwind: "$productDetails",
+    },
+    {
+      $lookup: {
+        from: "images",
+        let: { productId: "$productDetails._id", productColor: "$items.color" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$productId", "$$productId"] },
+                  { $eq: ["$color", "$$productColor"] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "productImages",
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        user: { $first: "$user" },
+        items: {
+          $push: {
+            product: "$items.product",
+            quantity: "$items.quantity",
+            size: "$items.size",
+            color: "$items.color",
+            productDetails: "$productDetails",
+            productImages: "$productImages",
+          },
+        },
+      },
+    },
+  ]);
+
+  if (!cart || cart.length === 0) {
+    throw new ApiError(404, "Cart not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, cart[0], "Cart fetched successfully"));
+});
 
 export { createCart, getCart };
