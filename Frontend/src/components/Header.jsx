@@ -172,6 +172,10 @@ const Header = ({ onSearchClick, searchVisible }) => {
     navigate("/");
   };
 
+  const handleCart = () => {
+    navigate("/cart");
+  };
+
   return (
     <div>
       <h1 className="flex bg-black text-white h-8 justify-center items-center">
@@ -271,7 +275,7 @@ const Header = ({ onSearchClick, searchVisible }) => {
                 </p>
               )}
             </div>
-            <IconButton className="bg-white">
+            <IconButton className="bg-white" onClick={handleCart}>
               <CiShoppingCart style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
           </div>
