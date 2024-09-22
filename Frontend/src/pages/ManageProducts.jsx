@@ -12,39 +12,37 @@ import ProductUpdateImage from "./ProductUpdateImage";
 import { ProductContext } from "../context/ProductContext";
 import {
   Button,
-  IconButton,
-  Input,
   Select,
   Option,
 } from "@material-tailwind/react";
-import { CiSearch } from "react-icons/ci";
 import { useSearchParams } from "react-router-dom";
 
 const ManageProducts = ({
   renderSmallCard = false,
   allProductProp,
   detailedProductCard = true,
+  defaultCategory = "All",
+  defaultSubcategory = "",
 }) => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubcategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(defaultCategory); 
+  const [selectedSubcategory, setSelectedSubcategory] = useState(defaultSubcategory);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [selectedProductIdForImage, setSelectedProductIdForImage] =
     useState(null);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { setProductId } = useContext(ProductContext);
   const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]);
 
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
+  
 
   useEffect(() => {
     fetchProducts();
@@ -111,7 +109,6 @@ const ManageProducts = ({
     setFilteredProducts(filtered);
   };
 
-  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
@@ -184,10 +181,9 @@ const ManageProducts = ({
     navigate(`/detailedProduct/${productId}?color=${color}`);
   };
 
-  const handleSearchClick = () => setIsSearchOpen(!isSearchOpen);
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 mb-20">
       <ToastContainer />
       {loading && <LoadingOverlay />}
       {selectedProductId && (
@@ -205,38 +201,6 @@ const ManageProducts = ({
 
       {detailedProductCard && (
         <>
-          <div className="my-4 flex items-center">
-            <IconButton
-              className="mt-4"
-              variant="outlined"
-              onClick={handleSearchClick}
-            >
-              <CiSearch
-                className="cursor-pointer text-gray-600 transition-transform duration-300 hover:scale-110"
-                style={{ color: "black", fontSize: "2.5em" }}
-                size={24}
-              />
-            </IconButton>
-
-            <div
-              className={`transition-all duration-500 ease-in-out ml-2 pt-5 overflow-hidden ${
-                isSearchOpen ? "w-full" : "w-0"
-              }`}
-            >
-              <Input
-                variant="standard"
-                type="text"
-                label="Type to search"
-                placeholder="Search by product name"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className={`pl-4 pr-4 py-2 w-full shadow-sm transition duration-300 transform ${
-                  isSearchOpen ? "scale-100" : "scale-0"
-                }`}
-              />
-            </div>
-          </div>
-
           <div className="my-4 flex gap-2">
             <Button
               variant="outlined"
@@ -302,7 +266,7 @@ const ManageProducts = ({
         </div>
       )}
 
-      <div className="flex justify-center items-center mt-8">
+      <div className="flex justify-center items-center mt-12">
         <Button
           onClick={handlePreviousPage}
           className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
