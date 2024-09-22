@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import { NavLink } from "react-router-dom";
 import logo from "../assets/webs-log.png";
 import AvatarWithUserDropdown from "../components/AvatarWithUserDropdown";
@@ -15,29 +16,30 @@ import {
   MenuItem,
   Input,
   Button,
+  Badge
 } from "@material-tailwind/react";
 import { HiBars3, HiOutlineXMark } from "react-icons/hi2";
 import { CiSearch, CiShoppingCart } from "react-icons/ci";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const gentsFootWearMenuItems = [
-  { title: "SHOES" },
-  { title: "SANDALS" },
-  { title: "SLIPPER" },
-  { title: "SNEAKERS" },
+  { title: "SHOES", path: "/gentsShoes"},
+  { title: "SANDALS", path: "/gentsSandals"},
+  { title: "SLIPPER", path: "/gentsSlippers"},
+  { title: "SNEAKERS", path: "/gentsSneakers"},
 ];
 
 const ladiesFootWearMenuItems = [
-  { title: "SANDALS" },
-  { title: "PUMPS" },
-  { title: "SNEAKERS" },
-  { title: "SHOES" },
+  { title: "SANDALS", path: "/ladiesSandals" },
+  { title: "PUMPS" , path: "/ladiesPumps"},
+  { title: "SNEAKERS", path: "/ladiesSneakers" },
+  { title: "SHOES" , path: "/ladiesShoes"},
+  { title: "SNEAKERS", path: "/ladiesSlippers" },
 ];
 
 const newArrivalsMenuItems = [
-  { title: "GENTS FOOTWEAR" },
-  { title: "LADIES FOOTWEAR" },
+  { title: "GENTS FOOTWEAR", path: "/gentsNewArrivals" },
+  { title: "LADIES FOOTWEAR", path: "/ladiesNewArrivals" },
 ];
 
 const saleMenuItems = [
@@ -49,9 +51,19 @@ function NavListMenu({ label, menuItems }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const renderItems = menuItems.map(({ title }, key) => (
-    <a href="#" key={key}>
-      <MenuItem className="rounded-lg p-2 hover:bg-transparent">
+  const renderItems = menuItems.map(({ title, path }, key) => (
+    <MenuItem className="rounded-lg p-2 hover:bg-transparent" key={key}>
+      {path ? (
+        <NavLink to={path}>
+          <Typography
+            variant="h6"
+            color="blue-gray"
+            className="text-sm font-bold"
+          >
+            {title}
+          </Typography>
+        </NavLink>
+      ) : (
         <Typography
           variant="h6"
           color="blue-gray"
@@ -59,9 +71,10 @@ function NavListMenu({ label, menuItems }) {
         >
           {title}
         </Typography>
-      </MenuItem>
-    </a>
+      )}
+    </MenuItem>
   ));
+
   return (
     <React.Fragment>
       <Menu
@@ -93,6 +106,7 @@ function NavListMenu({ label, menuItems }) {
   );
 }
 
+
 function NavList() {
   return (
     <List className="mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
@@ -115,7 +129,10 @@ const Header = ({ onSearchClick, searchVisible }) => {
   const [userFirstName, setUserFirstName] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading , setLoading] = useState(false)
   const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
     const fetchUserFirstName = async () => {
@@ -134,6 +151,34 @@ const Header = ({ onSearchClick, searchVisible }) => {
     };
     fetchUserFirstName();
   }, []);
+
+  useEffect(() => {
+    const fetchTotalItems = async () => {
+      if (!userId) {
+        setError("User ID not found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`/api/cart/total-items/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        setTotalItems(response.data.data.totalItems);
+      } catch (error) {
+        setError("Failed to fetch total items");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTotalItems();
+  }, [userId]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -275,9 +320,13 @@ const Header = ({ onSearchClick, searchVisible }) => {
                 </p>
               )}
             </div>
-            <IconButton className="bg-white" onClick={handleCart}>
+            {/* CiShoppingCart */}
+              <Badge content={totalItems} withBorder>
+              <IconButton className="bg-white" onClick={handleCart}>
               <CiShoppingCart style={{ color: "black", fontSize: "2.5em" }} />
             </IconButton>
+            </Badge>
+            
           </div>
           <div className="flex items-center">
             <button
