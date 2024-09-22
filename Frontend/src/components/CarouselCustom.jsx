@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 
 export function CarouselCustom() {
   const images = [
-    "https://img.freepik.com/free-photo/collection-colorful-shoes-neatly-lined-up-wooden-shelves_91128-4251.jpg?t=st=1723222215~exp=1723225815~hmac=97b2d8e4bc37ab35319114f02fef424d9b7898130c846b8215dba274524ba413&w=1380",
-    "https://img.freepik.com/free-photo/still-life-say-no-fast-fashion_23-2149669600.jpg?t=st=1723222306~exp=1723225906~hmac=91f03cf1debf46a63e56826b54b7660e73db6ca939bc52bdf35d11261ec35b29&w=1060",
-    "https://img.freepik.com/free-vector/modern-sale-banner-with-product_1361-1636.jpg?w=1060&t=st=1723222647~exp=1723223247~hmac=cf7dedeb17fc3f731a6581b374b27f31c09cf2291ca7e011b9b3d780f621b491",
+    "https://images.unsplash.com/photo-1548801133-da353ebb1d97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/flagged/photo-1556637640-2c80d3201be8?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=1925&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1662138679794-110b0cba27b9?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
