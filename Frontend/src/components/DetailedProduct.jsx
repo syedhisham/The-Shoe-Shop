@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ErrorToast from "./ErrorToast";
+import SuccessToast from "./SuccessToast";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
@@ -12,12 +13,15 @@ import { Button } from "@material-tailwind/react";
 
 const DetailedProduct = () => {
   const { productId } = useParams();
+  const userId = localStorage.getItem("userId");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
   const [colorImages, setColorImages] = useState([]);
   const [colorsWithImages, setColorsWithImages] = useState([]);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedColor, setSelectedColor] = useState("");
+  const [quantity, setQuantity] = useState(1);
   const [isFilled, setIsFilled] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState({
     textColor: "",
@@ -67,6 +71,35 @@ const DetailedProduct = () => {
 
     fetchProductById();
   }, [productId]);
+
+  const handleAddToCart = async () => {
+    if (!userId || !productId) {
+      alert("User or Product ID is missing");
+      return;
+    }
+
+    const cartData = {
+      quantity,
+      size: selectedSize || "39", 
+      color: selectedColor || "Black", 
+    };
+
+    try {
+      const response = await axios.post(
+        `/api/cart/create-cart/user/${userId}/product/${productId}`,
+        cartData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, 
+          },
+        }
+      );
+      SuccessToast("Item added to cart");
+    } catch (error) {
+      console.error("Error adding item to cart", error);
+      ErrorToast("Error adding item to cart");
+    }
+  };
 
   useEffect(() => {
     if (product) {
@@ -131,6 +164,7 @@ const DetailedProduct = () => {
   const handleHeartClick = () => {
     setIsFilled(!isFilled);
   };
+  console.log("The selected color is", selectedColor);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -203,7 +237,11 @@ const DetailedProduct = () => {
                 <div
                   key={color}
                   className="flex flex-col items-center cursor-pointer"
-                  onClick={() => handleColorClick(color)}
+                  onClick={() => {
+                    handleColorClick(color);
+                    setSelectedColor(color);
+                  }}
+                  value={color}
                 >
                   <img
                     src={imageUrl}
@@ -226,6 +264,8 @@ const DetailedProduct = () => {
                 <button
                   key={size}
                   onClick={() => handleSizeClick(size)}
+                  value={selectedSize}
+                  onChange={(e) => setSelectedSize(e.target.value)}
                   className={`py-[8px] px-8 rounded-lg border transition-colors duration-200 ${
                     selectedSize === size
                       ? "bg-black text-white"
@@ -238,7 +278,19 @@ const DetailedProduct = () => {
             </div>
           </div>
 
+          {/* Quantity Selector */}
+          <div className="quantity-selector">
+            <label>Quantity:</label>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              min="1"
+            />
+          </div>
+
           <Button
+            onClick={handleAddToCart}
             size="lg"
             className="bg-black hover:bg-gray-700 text-white py-2 px-4 rounded-lg transition duration-200 mt-4"
           >
