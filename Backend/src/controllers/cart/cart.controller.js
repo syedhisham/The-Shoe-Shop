@@ -146,13 +146,73 @@ const getCart = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if (!cart || cart.length === 0) {
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        cart.length ? cart[0] : { items: [] },
+        "Cart fetched successfully"
+      )
+    );
+});
+
+const deleteCartItem = asyncHandler(async (req, res) => {
+  const { userId, productId } = req.params;
+
+  if (!userId || !productId) {
+    throw new ApiError(400, "User ID and Product ID are required to proceed");
+  }
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const cart = await Cart.findOne({ user: user._id });
+  if (!cart) {
     throw new ApiError(404, "Cart not found");
   }
 
+  const itemIndex = cart.items.findIndex(
+    (item) => item.product.toString() === productId
+  );
+
+  if (itemIndex === -1) {
+    throw new ApiError(404, "Item not found in cart");
+  }
+
+  // Remove the item from the cart
+  cart.items.splice(itemIndex, 1);
+  await cart.save();
+
   return res
     .status(200)
-    .json(new ApiResponse(200, cart[0], "Cart fetched successfully"));
+    .json(new ApiResponse(200, cart, "Item removed from cart successfully"));
 });
 
-export { createCart, getCart };
+const getTotalItemsInCart = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  if (!userId) {
+    throw new ApiError(400, "User ID is required to proceed");
+  }
+
+  const user = await User.findById(userId).select("-password -refreshToken");
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const cart = await Cart.findOne({ user: user._id });
+  
+  if (!cart) {
+    return res.status(200).json(new ApiResponse(200, { totalItems: 0 }, "Cart is empty"));
+  }
+
+  const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
+
+  return res.status(200).json(new ApiResponse(200, { totalItems }, "Total items fetched successfully"));
+});
+
+
+export { createCart, getCart, deleteCartItem, getTotalItemsInCart };
