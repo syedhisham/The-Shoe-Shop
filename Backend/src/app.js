@@ -21,11 +21,13 @@ import userRoutes from "./routes/user/user.route.js";
 import productRoutes from "./routes/product/product.route.js";
 import cartRoutes from "./routes/cart/cart.routes.js";
 import reviewRoutes from "./routes/review/review.routes.js"
+import orderRoutes from "./routes/order/order.route.js"
 
 //routes
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/orders", orderRoutes);
 
 export { app };
