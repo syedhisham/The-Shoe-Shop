@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import LoadingOverlay from "../components/LoadingOverlay";
 import ErrorToast from "../components/ErrorToast";
@@ -8,8 +9,10 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const userId = localStorage.getItem("userId");
+
   useEffect(() => {
     const fetchCartItems = async () => {
       if (!userId) {
@@ -73,9 +76,20 @@ const Cart = () => {
     }
   };
 
+  const handleUpdateItem = (item) => {
+    navigate(`/detailedProduct/${item}`);
+  };
+
+  const handleCheckout = () => {
+    navigate(`/checkout`); 
+  };
+
   if (loading) {
     return <LoadingOverlay />;
   }
+
+const itemsArray = cartItems.map((item) =>   console.log("This is cart items",item.product))
+  
 
   return (
     <div className="max-w-screen-2xl mx-auto p-5">
@@ -84,9 +98,9 @@ const Cart = () => {
 
       {cartItems.length > 0 ? (
         <div className="flex flex-col space-y-4">
-          {cartItems.map((item) => (
+          {cartItems.map((item, index) => (
             <div
-              key={item.productDetails._id}
+            key={`${item.productDetails._id}-${index}`}
               className="flex flex-col sm:flex-row justify-center items-start border border-gray-300 p-4 rounded-lg shadow-md bg-white"
             >
               {item.productImages.length > 0 && (
@@ -107,17 +121,38 @@ const Cart = () => {
                   Price: Rs {item.productDetails.price * item.quantity}
                 </p>
               </div>
-              <button
-                onClick={() => handleDeleteItem(item.product)}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mt-4 sm:mt-0 sm:ml-4"
-              >
-                Remove
-              </button>
+
+              <div className="flex flex-col space-y-2 sm:ml-4">
+                <button
+                  onClick={() => handleUpdateItem(item.product)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={() => handleDeleteItem(item.product)}
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>
       ) : (
         <div className="text-center text-gray-500">Your cart is empty.</div>
+      )}
+
+      {/* Checkout Button */}
+      {cartItems.length > 0 && (
+        <div className="text-right mt-6">
+          <button
+            onClick={handleCheckout}
+            className="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 transition"
+          >
+            Checkout
+          </button>
+        </div>
       )}
     </div>
   );
