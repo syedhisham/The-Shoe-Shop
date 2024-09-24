@@ -8,19 +8,24 @@ import ManageProducts from "../pages/ManageProducts";
 import ReviewsOnProduct from "./ReviewsOnProduct";
 import { FaRegHeart, FaHeart } from "react-icons/fa";
 import LoadingOverlay from "./LoadingOverlay";
-import { useParams } from "react-router-dom";
-import { Button } from "@material-tailwind/react";
+import { useLocation, useParams } from "react-router-dom";
+import { Button, Input } from "@material-tailwind/react";
 
 const DetailedProduct = () => {
   const { productId } = useParams();
+  const location = useLocation();
   const userId = localStorage.getItem("userId");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState("");
   const [colorImages, setColorImages] = useState([]);
   const [colorsWithImages, setColorsWithImages] = useState([]);
-  const [selectedSize, setSelectedSize] = useState(null);
-  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedSize, setSelectedSize] = useState(
+    location.state?.selectedSize || null
+  );
+  const [selectedColor, setSelectedColor] = useState(
+    location.state?.selectedColor || ""
+  );
   const [quantity, setQuantity] = useState(1);
   const [isFilled, setIsFilled] = useState(false);
   const [inventoryStatus, setInventoryStatus] = useState({
@@ -78,10 +83,15 @@ const DetailedProduct = () => {
       return;
     }
 
+    if (!selectedSize || !selectedColor) {
+      ErrorToast("Please select both size and color before adding to cart.");
+      return;
+    }
+
     const cartData = {
       quantity,
-      size: selectedSize || "39", 
-      color: selectedColor || "Black", 
+      size: selectedSize,
+      color: selectedColor,
     };
 
     try {
@@ -90,7 +100,7 @@ const DetailedProduct = () => {
         cartData,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, 
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
       );
@@ -164,7 +174,6 @@ const DetailedProduct = () => {
   const handleHeartClick = () => {
     setIsFilled(!isFilled);
   };
-  console.log("The selected color is", selectedColor);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -210,11 +219,12 @@ const DetailedProduct = () => {
               )}
             </div>
           </div>
-          <p className="text-xl font-semibold text-gray-700 mb-2">
-            Price: Rs {product.price}
+          <p className="text-md font-semibold text-gray-700 mb-2">
+            Price:
+            <span className="font-normal"> Rs {product.price}</span>
           </p>
-          <p className="text-md text-gray-600 mb-2">
-            Stock: <span className="font-semibold">{product.stock}</span>
+          <p className="text-md text-gray-600 mb-2 font-semibold">
+            Stock: <span className="font-normal">{product.stock}</span>
           </p>
           {/* Inventory status */}
           <div className="flex items-center">
@@ -226,12 +236,15 @@ const DetailedProduct = () => {
             </p>
           </div>
 
-          <p className="text-md text-gray-600 mb-4">
-            Description: {product.description}
+          <p className="text-md text-gray-600 mb-4 font-semibold">
+            Description:{" "}
+            <span className="font-normal">{product.description}</span>
           </p>
 
           <div className="mt-4">
-            <h2 className="text-lg font-semibold mb-2">Available Colors</h2>
+            <h2 className="text-md text-gray-600 font-semibold mb-2">
+              Available Colors
+            </h2>
             <div className="flex flex-wrap gap-4">
               {colorsWithImages.map(({ color, imageUrl }) => (
                 <div
@@ -246,10 +259,14 @@ const DetailedProduct = () => {
                   <img
                     src={imageUrl}
                     alt={color}
-                    className="w-16 h-16 rounded-lg object-cover mb-2"
+                    className={`w-16 h-16 rounded-lg object-cover mb-2 transition-transform duration-300 ${
+                      selectedColor === color ? "scale-75" : "scale-85"
+                    }`}
                   />
                   <div
-                    className="w-16 h-1 -mt-3 rounded-br-3xl rounded-bl-3xl"
+                    className={`w-16 h-1 -mt-3 rounded-br-3xl rounded-bl-3xl transition-transform duration-300 ${
+                      selectedColor === color ? "scale-75" : "scale-85"
+                    }`}
                     style={{ backgroundColor: color }}
                   ></div>
                 </div>
@@ -258,11 +275,14 @@ const DetailedProduct = () => {
           </div>
 
           <div className="mt-4">
-            <h2 className="text-lg font-semibold mb-2">Available Sizes</h2>
+            <h2 className="font-semibold mb-2 text-md text-gray-600">
+              Available Sizes
+            </h2>
             <div className="flex gap-2">
-              {sizes.map((size) => (
-                <button
-                  key={size}
+              {sizes.map((size, index) => (
+                <Button
+                  key={index}
+                  size="lg"
                   onClick={() => handleSizeClick(size)}
                   value={selectedSize}
                   onChange={(e) => setSelectedSize(e.target.value)}
@@ -273,20 +293,27 @@ const DetailedProduct = () => {
                   }`}
                 >
                   {size}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
 
-          {/* Quantity Selector */}
-          <div className="quantity-selector">
-            <label>Quantity:</label>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              min="1"
-            />
+          <div className="quantity-selector flex items-center gap-6 py-4">
+            <span className="font-semibold text-md text-gray-600">
+              Quantity:
+            </span>
+            <div className="relative w-16 sm:w-20 lg:w-24">
+              <Input
+                type="number"
+                variant="standard"
+                label="Select Quantity"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                min="1"
+                className="peer"
+                containerProps={{ className: "max-w-20" }}
+              />
+            </div>
           </div>
 
           <Button

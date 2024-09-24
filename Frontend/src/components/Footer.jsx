@@ -6,7 +6,7 @@ const SITEMAP = [
     title: "Company",
     links: [
       { label: "About Us", path: "/aboutUs" },
-      { label: "Find Us", path: "/findUs" }
+      { label: "Find Us", path: "/findUs" },
     ],
   },
   {
@@ -98,12 +98,10 @@ const Footer = () => {
         </div>
         <div className="flex w-full flex-col items-center justify-center border-t border-blue-gray-200 py-4 md:flex-row md:justify-between">
           <p className="mb-4 text-center font-normal text-gray-500 md:mb-0 text-sm">
-            &copy; {currentYear}{" "}
-            <a href="https://material-tailwind.com/">The Shoe Shop</a>. All
-            Rights Reserved.
+            &copy; {currentYear} <a href="/">The Shoe Shop</a>. All Rights
+            Reserved.
           </p>
           <div className="flex gap-4 text-blue-gray-300 sm:justify-center">
-            
             <Typography
               as="a"
               target="_blank"
