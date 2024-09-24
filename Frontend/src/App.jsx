@@ -34,6 +34,7 @@ import LadiesNewArrival from "./pages/LadiesNewArrival";
 import GentsFootwear from "./pages/GentsFootwear";
 import LadiesFootwear from "./pages/LadiesFootwear";
 import FindUs from "./components/FindUs";
+import Checkout from "./pages/Checkout";
 
 function App() {
   return (
@@ -59,6 +60,7 @@ function App() {
         <Route path="/gentsFootwear" element={<GentsFootwear />} />
         <Route path="/ladiesFootwear" element={<LadiesFootwear />} />
         <Route path="/findUs" element={<FindUs />} />
+        <Route path="/checkout" element={<Checkout />} />
         
         </Route>
         <Route path="/" element={<Home />} />
