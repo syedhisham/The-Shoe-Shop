@@ -14,6 +14,10 @@ const orderSchema = new mongoose.Schema(
           ref: "Product",
           required: true,
         },
+        productName: {
+          type: String,
+          required: true
+        },
         quantity: {
           type: Number,
           required: true,
@@ -33,12 +37,11 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["Credit Card", "PayPal", "Cash on Delivery"],
+      enum: ["Credit Card", "JazzCash","EasyPaisa", "Cash on Delivery"],
       required: true,
     },
     shippingAddress: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Address",
+      type: String,
       required: true,
     },
   },
