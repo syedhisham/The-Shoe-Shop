@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ErrorToast from "../components/ErrorToast";
+import SuccessToast from "../components/SuccessToast";
 import axios from "axios";
-import {
-  Button,
-  Select,
-  Option,
-  Input,
-  Textarea,
-} from "@material-tailwind/react";
+import { Button, Select, Option, Textarea } from "@material-tailwind/react";
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -63,8 +59,14 @@ const Checkout = () => {
 
       const response = await axios.post("/api/orders/create", orderData);
       if (response.status === 201) {
-        navigate("/order-confirmation", {
-          state: { orderId: response.data._id },
+        const orderId = response.data.data._id;
+        navigate(`/orderConfirmation/${orderId}`, {
+          state: {
+            totalAmount,
+            paymentMethod,
+            shippingAddress,
+            cartItems,
+          },
         });
       }
     } catch (error) {
@@ -97,7 +99,7 @@ const Checkout = () => {
         <Select
           label="Payment Method"
           value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
+          onChange={(value) => setPaymentMethod(value)}
           className="w-full mb-3"
         >
           <Option value="Credit Card">Credit Card</Option>
