@@ -204,15 +204,38 @@ const getTotalItemsInCart = asyncHandler(async (req, res) => {
   }
 
   const cart = await Cart.findOne({ user: user._id });
-  
+
   if (!cart) {
-    return res.status(200).json(new ApiResponse(200, { totalItems: 0 }, "Cart is empty"));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { totalItems: 0 }, "Cart is empty"));
   }
 
-  const totalItems = cart.items.reduce((total, item) => total + item.quantity, 0);
+  const totalItems = cart.items.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
-  return res.status(200).json(new ApiResponse(200, { totalItems }, "Total items fetched successfully"));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { totalItems }, "Total items fetched successfully")
+    );
 });
 
+const deleteCartItems = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
 
-export { createCart, getCart, deleteCartItem, getTotalItemsInCart };
+  const resetCart = await Cart.findOneAndDelete({ user: userId });
+  if (!resetCart) {
+    throw new ApiError(500, "Something went wrong while reseting the cart");
+  }
+});
+
+export {
+  createCart,
+  getCart,
+  deleteCartItem,
+  getTotalItemsInCart,
+  deleteCartItems,
+};
